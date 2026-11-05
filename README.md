@@ -260,7 +260,7 @@ The system uses standard **120 mm $\times$ 120 mm** fiducial markers from the **
 
 ## 👥 Authors & Academic Attribution
 
-- **Student:** Prit Zania (ID: 202401495)
+- **Student:** Prit Zania (ID: 202401495) ,Divy Goti (ID:202401059), Manthan KANETIYA (ID :202401081) 
 - **Course:** Control of Autonomous Systems (IE415)
 - **Institution:** Dhirubhai Ambani Institute of Information and Communication Technology (DA-IICT) / DAU
 - **Instructor / Evaluator:** Semester Project Review
