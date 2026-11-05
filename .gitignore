@@ -1,0 +1,30 @@
+# Python Virtual Environment & Bytecode
+.venv/
+env/
+venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+
+# Transient local phone recording sessions (bundle only lightweight synthetic demo)
+recordings/*
+!recordings/synthetic_demo/
+!recordings/synthetic_demo/**
+
+# Android & Gradle Build Artifacts
+.gradle/
+**/build/
+android/local.properties
+android-simple/local.properties
+.idea/
+*.iml
+.cxx/
+local.properties
+
+# Temporary logs & test scripts
+*.log
+tmp_check.js
+test_script.js
+test_script_*.js

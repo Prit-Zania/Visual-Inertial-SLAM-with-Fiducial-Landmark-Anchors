@@ -1,0 +1,1 @@
+{"kind": "hello", "protocol": "oneplus-msckf-v1", "session_id": "e64d2d79-22aa-4c0d-85af-5caa414e62f7", "synthetic": true, "scenario": "exp2_marker_loss", "description": "Scenario 2: Marker-loss path with 3.5s occluded segment testing VIO drift and recovery.", "selected_sensors": {"1": 1, "4": 4, "2": 2}}

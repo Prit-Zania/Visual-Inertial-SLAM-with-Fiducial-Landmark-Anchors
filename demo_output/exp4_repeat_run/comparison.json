@@ -1,0 +1,37 @@
+{
+  "processed": {
+    "samples": 75,
+    "alignment": "none",
+    "position_rmse_m": 0.021816634581784723,
+    "position_median_m": 0.019128860425414222,
+    "position_p95_m": 0.03276099352973681,
+    "endpoint_error_m": 0.01733497003243212,
+    "relative_displacement_1s_rmse_m": 0.016179602359819915,
+    "reference_distance_m": 1.0775923434269574,
+    "endpoint_error_per_m": 0.016086760580818045,
+    "orientation_rmse_deg": 0.2150131060897937,
+    "uncertainty": {
+      "position_nees_mean": 1.62972786253374,
+      "position_95pct_ellipsoid_coverage": 1.0,
+      "expected_position_nees_if_model_consistent": 3,
+      "samples": 75,
+      "note": "Same coordinate frame required. Synthetic coverage does not validate phone noise calibration."
+    }
+  },
+  "baseline": {
+    "samples": 75,
+    "alignment": "none",
+    "position_rmse_m": 0.3898795726481618,
+    "position_median_m": 0.36013219259794454,
+    "position_p95_m": 0.657099958408935,
+    "endpoint_error_m": 0.7023051808410355,
+    "relative_displacement_1s_rmse_m": 0.24891651371506243,
+    "reference_distance_m": 1.0775923434269574,
+    "endpoint_error_per_m": 0.6517354963822086,
+    "orientation_rmse_deg": 0.33818513358163527
+  },
+  "scenario": "exp4_repeat_run",
+  "description": "Scenario 4: Repeat run in the same room using the pre-constructed marker map from Scenario 3.",
+  "slam_runtime_s": 63.274683099996764,
+  "baseline_runtime_s": 1.2077807000023313
+}

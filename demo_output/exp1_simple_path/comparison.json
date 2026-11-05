@@ -1,0 +1,37 @@
+{
+  "processed": {
+    "samples": 82,
+    "alignment": "none",
+    "position_rmse_m": 0.03488046078269161,
+    "position_median_m": 0.022361368897654207,
+    "position_p95_m": 0.07047735141437897,
+    "endpoint_error_m": 0.017842364273691468,
+    "relative_displacement_1s_rmse_m": 0.02027719707157858,
+    "reference_distance_m": 0.98309518948453,
+    "endpoint_error_per_m": 0.01814917259746416,
+    "orientation_rmse_deg": 0.5017036924580662,
+    "uncertainty": {
+      "position_nees_mean": 2.4335226504224168,
+      "position_95pct_ellipsoid_coverage": 0.926829268292683,
+      "expected_position_nees_if_model_consistent": 3,
+      "samples": 82,
+      "note": "Same coordinate frame required. Synthetic coverage does not validate phone noise calibration."
+    }
+  },
+  "baseline": {
+    "samples": 82,
+    "alignment": "none",
+    "position_rmse_m": 0.6392416248841964,
+    "position_median_m": 0.6198421829800111,
+    "position_p95_m": 0.930719690677238,
+    "endpoint_error_m": 0.9773239917219295,
+    "relative_displacement_1s_rmse_m": 0.17986999976623141,
+    "reference_distance_m": 0.98309518948453,
+    "endpoint_error_per_m": 0.9941295636227998,
+    "orientation_rmse_deg": 1.020134510085088
+  },
+  "scenario": "exp1_simple_path",
+  "description": "Scenario 1: Simple L-shaped trajectory past 4 fixed ArUco markers.",
+  "slam_runtime_s": 100.62253269995563,
+  "baseline_runtime_s": 1.5116595000145026
+}

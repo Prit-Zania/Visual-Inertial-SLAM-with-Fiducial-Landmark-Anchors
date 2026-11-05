@@ -1,0 +1,1 @@
+{"kind": "hello", "protocol": "oneplus-msckf-v1", "session_id": "d5247985-a35c-4954-aa23-52c0d389fd72", "synthetic": true, "scenario": "exp3_closed_loop", "description": "Scenario 3: Closed-loop trajectory returning to start with loop-closure re-observation.", "selected_sensors": {"1": 1, "4": 4, "2": 2}}

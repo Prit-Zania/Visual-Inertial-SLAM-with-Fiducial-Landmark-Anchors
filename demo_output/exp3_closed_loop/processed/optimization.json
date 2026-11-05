@@ -1,0 +1,176 @@
+[
+  {
+    "kind": "window",
+    "end_frame": 3,
+    "cost": 0.9813613855148716,
+    "optimality": 5.598582257265727e-06,
+    "converged": true,
+    "accepted": true,
+    "imu_factors": 2,
+    "feature_tracks": 0,
+    "marker_observations": 6
+  },
+  {
+    "kind": "window",
+    "end_frame": 7,
+    "cost": 2.6281640266496566,
+    "optimality": 0.00016649021083614494,
+    "converged": true,
+    "accepted": true,
+    "imu_factors": 5,
+    "feature_tracks": 0,
+    "marker_observations": 13
+  },
+  {
+    "kind": "window",
+    "end_frame": 11,
+    "cost": 323.06423436814566,
+    "optimality": 18859.163805995908,
+    "converged": true,
+    "accepted": true,
+    "imu_factors": 5,
+    "feature_tracks": 2,
+    "marker_observations": 14
+  },
+  {
+    "kind": "window",
+    "end_frame": 15,
+    "cost": 246.22347083578666,
+    "optimality": 15.744268096236567,
+    "converged": false,
+    "accepted": false,
+    "imu_factors": 5,
+    "feature_tracks": 1,
+    "marker_observations": 14
+  },
+  {
+    "kind": "window",
+    "end_frame": 19,
+    "cost": 2696.822388733036,
+    "optimality": 181.67012655307917,
+    "converged": false,
+    "accepted": false,
+    "imu_factors": 5,
+    "feature_tracks": 9,
+    "marker_observations": 15
+  },
+  {
+    "kind": "window",
+    "end_frame": 23,
+    "cost": 3015.7790583416922,
+    "optimality": 231.610897685129,
+    "converged": false,
+    "accepted": false,
+    "imu_factors": 5,
+    "feature_tracks": 40,
+    "marker_observations": 13
+  },
+  {
+    "kind": "window",
+    "end_frame": 27,
+    "cost": 4376.048621330214,
+    "optimality": 1498.4560422129225,
+    "converged": false,
+    "accepted": false,
+    "imu_factors": 5,
+    "feature_tracks": 40,
+    "marker_observations": 17
+  },
+  {
+    "kind": "window",
+    "end_frame": 31,
+    "cost": 5824.247900245115,
+    "optimality": 1966.0347456797526,
+    "converged": false,
+    "accepted": false,
+    "imu_factors": 5,
+    "feature_tracks": 37,
+    "marker_observations": 18
+  },
+  {
+    "kind": "window",
+    "end_frame": 35,
+    "cost": 5560.299290590586,
+    "optimality": 1495.9990949602188,
+    "converged": false,
+    "accepted": false,
+    "imu_factors": 5,
+    "feature_tracks": 40,
+    "marker_observations": 16
+  },
+  {
+    "kind": "window",
+    "end_frame": 39,
+    "cost": 4229.810105335331,
+    "optimality": 253.72017084101296,
+    "converged": false,
+    "accepted": false,
+    "imu_factors": 5,
+    "feature_tracks": 40,
+    "marker_observations": 11
+  },
+  {
+    "kind": "window",
+    "end_frame": 43,
+    "cost": 3605.071049368583,
+    "optimality": 117.93942315244595,
+    "converged": false,
+    "accepted": false,
+    "imu_factors": 5,
+    "feature_tracks": 40,
+    "marker_observations": 7
+  },
+  {
+    "kind": "window",
+    "end_frame": 47,
+    "cost": 2731.855220866292,
+    "optimality": 1142.6635487363194,
+    "converged": false,
+    "accepted": false,
+    "imu_factors": 5,
+    "feature_tracks": 40,
+    "marker_observations": 8
+  },
+  {
+    "kind": "window",
+    "end_frame": 51,
+    "cost": 4423.84556199253,
+    "optimality": 50.301783491451765,
+    "converged": false,
+    "accepted": false,
+    "imu_factors": 5,
+    "feature_tracks": 40,
+    "marker_observations": 11
+  },
+  {
+    "kind": "window",
+    "end_frame": 55,
+    "cost": 3009.067410790938,
+    "optimality": 267.3335716224445,
+    "converged": false,
+    "accepted": false,
+    "imu_factors": 5,
+    "feature_tracks": 34,
+    "marker_observations": 14
+  },
+  {
+    "kind": "window",
+    "end_frame": 55,
+    "cost": 3009.067410790938,
+    "optimality": 267.3335716224445,
+    "converged": false,
+    "accepted": false,
+    "imu_factors": 5,
+    "feature_tracks": 34,
+    "marker_observations": 14
+  },
+  {
+    "kind": "global_pose_graph",
+    "cost": 41.4567855198149,
+    "converged": false,
+    "accepted": false,
+    "visual_loops": 0,
+    "marker_constraints": 120,
+    "note": "Correlated odometry/marker summaries; robust refinement, not an independent uncertainty estimate."
+  }
+]

@@ -1,0 +1,23 @@
+{
+  "date": "2026-10-21",
+  "python_tests": {"command": "python -m unittest discover -s tests -v", "passed": 21, "failed": 0},
+  "python_compileall": "passed",
+  "java_syntax": {"files_parsed": 4, "passed": true, "android_type_check": false},
+  "dashboard_smoke_test": {"passed": true, "states_loaded": 61, "markers_loaded": 1},
+  "synthetic": {
+    "source": "slam.simulate",
+    "frames_processed": 36,
+    "msckf_visual_updates": 11,
+    "aruco_updates": 26,
+    "marker_fused_position_rmse_m": 0.035878854582886366,
+    "no_marker_baseline_position_rmse_m": 0.0030068323575430647,
+    "optimization_attempts": 11,
+    "optimization_accepted": 10,
+    "note": "The baseline performs better on this short idealized simulation. No real-device accuracy claim."
+  },
+  "android_apk_built": false,
+  "android_sdk_license_accepted": false,
+  "phone_hardware_tested": false,
+  "live_pose_streaming": false,
+  "available_workflow": "Live phone capture and marker feedback; laptop offline MSCKF and map processing"
+}

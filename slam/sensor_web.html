@@ -1,0 +1,2672 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>IE415: Visual-Inertial SLAM & 3D Room Studio</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap"
+    rel="stylesheet">
+  <!-- Three.js and OrbitControls: Local Bundled first with CDN fallback -->
+  <script src="/three.min.js"></script>
+  <script>
+    if (!window.THREE) {
+      document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"><\/script>');
+    }
+  </script>
+  <script src="/OrbitControls.js"></script>
+  <script>
+    if (window.THREE && !THREE.OrbitControls) {
+      document.write('<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"><\/script>');
+    }
+  </script>
+  <style>
+    :root {
+      --bg: #090d16;
+      --card-bg: rgba(18, 24, 38, 0.85);
+      --card-border: rgba(255, 255, 255, 0.08);
+      --card-hover: rgba(255, 255, 255, 0.14);
+      --primary: #38bdf8;
+      --primary-glow: rgba(56, 189, 248, 0.25);
+      --accent: #818cf8;
+      --success: #34d399;
+      --warning: #fbbf24;
+      --danger: #f87171;
+      --text: #f1f5f9;
+      --text-muted: #94a3b8;
+      --font: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+      --mono: 'JetBrains Mono', monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: radial-gradient(circle at 10% 10%, #131d33 0%, var(--bg) 65%);
+      color: var(--text);
+      font-family: var(--font);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      background: rgba(15, 23, 42, 0.94);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--card-border);
+      padding: 12px 28px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-logo {
+      width: 42px;
+      height: 42px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #0284c7, #6366f1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 18px;
+      box-shadow: 0 0 20px var(--primary-glow);
+    }
+
+    .brand-text h1 {
+      font-size: 18px;
+      font-weight: 600;
+      letter-spacing: -0.3px;
+    }
+
+    .brand-text p {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 14px;
+      border-radius: 9999px;
+      font-size: 13px;
+      font-weight: 500;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--card-border);
+    }
+
+    .status-dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: var(--text-muted);
+    }
+
+    .status-dot.active {
+      background: var(--success);
+      box-shadow: 0 0 10px var(--success);
+    }
+
+    .status-dot.live {
+      background: #ef4444;
+      box-shadow: 0 0 12px #ef4444;
+      animation: pulse 0.8s infinite alternate;
+    }
+
+    @keyframes pulse {
+      from {
+        opacity: 0.4;
+      }
+
+      to {
+        opacity: 1;
+      }
+    }
+
+    .btn {
+      background: rgba(255, 255, 255, 0.06);
+      color: var(--text);
+      border: 1px solid var(--card-border);
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.15s ease;
+    }
+
+    .btn:hover {
+      background: rgba(255, 255, 255, 0.12);
+      border-color: var(--card-hover);
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #0284c7, #3b82f6);
+      border-color: transparent;
+      color: #fff;
+    }
+
+    .btn-primary:hover {
+      background: linear-gradient(135deg, #0369a1, #2563eb);
+      box-shadow: 0 0 16px var(--primary-glow);
+    }
+
+    .btn-live-start {
+      background: linear-gradient(135deg, #10b981, #059669);
+      border-color: transparent;
+      color: #fff;
+      font-weight: 600;
+    }
+
+    .btn-live-start:hover {
+      background: linear-gradient(135deg, #059669, #047857);
+      box-shadow: 0 0 16px rgba(16, 185, 129, 0.4);
+    }
+
+    .btn-danger {
+      background: rgba(239, 68, 68, 0.18);
+      border-color: rgba(239, 68, 68, 0.4);
+      color: var(--danger);
+    }
+
+    .btn-danger:hover {
+      background: rgba(239, 68, 68, 0.3);
+    }
+
+    .btn-warning {
+      background: rgba(245, 158, 11, 0.15);
+      border-color: rgba(245, 158, 11, 0.35);
+      color: var(--warning);
+    }
+
+    main {
+      flex: 1;
+      padding: 16px 28px;
+      max-width: 1600px;
+      margin: 0 auto;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    /* Tab Navigation */
+    .tab-nav {
+      display: flex;
+      gap: 6px;
+      border-bottom: 1px solid var(--card-border);
+      padding-bottom: 2px;
+      overflow-x: auto;
+    }
+
+    .tab-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      padding: 10px 18px;
+      border-radius: 8px 8px 0 0;
+      font-family: inherit;
+      font-size: 13.5px;
+      font-weight: 500;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border-bottom: 2px solid transparent;
+      white-space: nowrap;
+      transition: all 0.15s ease;
+    }
+
+    .tab-btn:hover {
+      color: var(--text);
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    .tab-btn.active {
+      color: var(--primary);
+      border-bottom-color: var(--primary);
+      background: rgba(56, 189, 248, 0.08);
+      font-weight: 600;
+    }
+
+    .tab-btn.live-tab.active {
+      color: #34d399;
+      border-bottom-color: #34d399;
+      background: rgba(52, 211, 153, 0.08);
+    }
+
+    .tab-content {
+      display: none;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .tab-content.active {
+      display: flex;
+    }
+
+    /* Live Studio Split Grid */
+    .live-split-grid {
+      display: grid;
+      grid-template-columns: 460px 1fr;
+      gap: 16px;
+      align-items: stretch;
+    }
+
+    @media (max-width: 1150px) {
+      .live-split-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .live-panel {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .live-panel-header {
+      padding: 12px 18px;
+      background: rgba(15, 23, 42, 0.7);
+      border-bottom: 1px solid var(--card-border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .live-feed-container {
+      width: 100%;
+      height: 345px;
+      background: #000;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    .live-feed-container img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .telemetry-card {
+      padding: 14px 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      font-size: 13px;
+    }
+
+    .telem-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 6px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+    }
+
+    .telem-label {
+      color: var(--text-muted);
+      font-size: 12px;
+    }
+
+    .telem-val {
+      font-family: var(--mono);
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    /* 3D Viewport Containers */
+    #live-three-container,
+    #threejs-container {
+      width: 100%;
+      height: 560px;
+      position: relative;
+      background: #060911;
+    }
+
+    #live-three-canvas,
+    #threejs-canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    .viewer-overlay {
+      position: absolute;
+      bottom: 14px;
+      left: 14px;
+      background: rgba(15, 23, 42, 0.88);
+      backdrop-filter: blur(8px);
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-size: 12px;
+      font-family: var(--mono);
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      pointer-events: none;
+      z-index: 10;
+    }
+
+    .viewer-legend {
+      position: absolute;
+      top: 14px;
+      right: 14px;
+      background: rgba(15, 23, 42, 0.88);
+      backdrop-filter: blur(8px);
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-size: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      z-index: 10;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .legend-color {
+      width: 12px;
+      height: 12px;
+      border-radius: 3px;
+    }
+
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 14px;
+    }
+
+    .metric-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 14px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .metric-card .title {
+      font-size: 11px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .metric-card .value {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .metric-card .sub {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .toggle-chip {
+      font-size: 12px;
+      padding: 4px 10px;
+      border-radius: 6px;
+      border: 1px solid var(--card-border);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(255, 255, 255, 0.03);
+      user-select: none;
+    }
+
+    .toggle-chip.active {
+      background: rgba(56, 189, 248, 0.15);
+      border-color: var(--primary);
+      color: var(--primary);
+    }
+
+    .table-container {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+      text-align: left;
+    }
+
+    th {
+      background: rgba(15, 23, 42, 0.7);
+      padding: 12px 16px;
+      font-weight: 600;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--card-border);
+      text-transform: uppercase;
+      font-size: 11px;
+      letter-spacing: 0.5px;
+    }
+
+    td {
+      padding: 12px 16px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    tr:hover td {
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .diff-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    .diff-better {
+      background: rgba(16, 185, 129, 0.15);
+      color: var(--success);
+    }
+
+    .exp-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 16px;
+    }
+
+    .exp-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 14px;
+      transition: all 0.2s ease;
+    }
+
+    .exp-card:hover {
+      border-color: var(--card-hover);
+      transform: translateY(-2px);
+    }
+
+    .marker-preview-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 16px;
+      padding: 18px;
+    }
+
+    .marker-box {
+      background: #ffffff;
+      border-radius: 8px;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      color: #000;
+    }
+
+    .marker-box svg {
+      width: 120px;
+      height: 120px;
+    }
+
+    .logs-console {
+      background: #070a12;
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      padding: 14px 16px;
+      font-family: var(--mono);
+      font-size: 12px;
+      color: #94a3b8;
+      max-height: 240px;
+      overflow-y: auto;
+      line-height: 1.6;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- Top Header -->
+  <header>
+    <div class="brand">
+      <div class="brand-logo">1+</div>
+      <div class="brand-text">
+        <h1>IE415: Visual-Inertial SLAM & 3D Room Studio</h1>
+        <p>Live Capturing • 15-State Error-State MSCKF • ArUco Fiducial Anchored Map</p>
+      </div>
+    </div>
+    <div class="header-actions">
+      <div class="status-badge" id="live-indicator-badge">
+        <span class="status-dot" id="live-dot"></span>
+        <span id="live-text">Live: Ready</span>
+      </div>
+      <div class="status-badge" id="receiver-badge">
+        <span class="status-dot" id="receiver-dot"></span>
+        <span id="receiver-text">Wi-Fi: 8765</span>
+      </div>
+      <button class="btn btn-primary" id="btn-toggle-receiver">Start Phone Receiver</button>
+    </div>
+  </header>
+
+  <main>
+    <!-- Navigation Tabs -->
+    <nav class="tab-nav">
+      <button class="tab-btn live-tab active" data-tab="tab-live">🔴 Live Capturing & 3D Room Studio</button>
+      <button class="tab-btn" data-tab="tab-slam">🗺️ Recorded Trajectories & Datasets</button>
+      <button class="tab-btn" data-tab="tab-scorecard">📊 Baseline vs SLAM Scorecard</button>
+      <button class="tab-btn" data-tab="tab-experiments">🧪 Benchmark Experiments (5 Scenarios)</button>
+      <button class="tab-btn" data-tab="tab-video">🎬 Video Player & Keypoints</button>
+      <button class="tab-btn" data-tab="tab-sensors">📈 Phone Sensors Analytics</button>
+      <button class="tab-btn" data-tab="tab-markers">🖨️ ArUco Marker Print Studio</button>
+    </nav>
+
+    <!-- ========================================== -->
+    <!-- TAB 1: LIVE CAPTURING & 3D ROOM STUDIO     -->
+    <!-- ========================================== -->
+    <section id="tab-live" class="tab-content active">
+      <!-- Live Control Toolbar -->
+      <div
+        style="background:var(--card-bg); border:1px solid var(--card-border); border-radius:12px; padding:14px 18px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:14px;">
+        <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
+          <span style="font-size:13px; font-weight:600; color:var(--text-muted);">Capture Source:</span>
+          <select id="live-source-select"
+            style="padding:8px 14px; background:#0f172a; color:#38bdf8; border:1px solid rgba(56, 189, 248, 0.4); border-radius:8px; font-weight:700;">
+            <option value="phone" selected>📱 Mobile Phone App Stream (OnePlus Wi-Fi 8765)</option>
+            <option value="simulated_walk">🚶 3D Room Walk Simulation (Live Traversal)</option>
+            <option value="webcam">📹 Laptop Webcam (Live 30 FPS)</option>
+          </select>
+          <button class="btn btn-danger" id="btn-live-toggle">⏹ STOP LIVE CAPTURE</button>
+          <button class="btn" id="btn-live-clear">🔄 Clear Path</button>
+          <button class="btn btn-success" id="btn-live-save" style="font-weight:700;">💾 Save Captured Dataset</button>
+          <a class="btn" id="btn-live-download-csv" href="/api/live/download_csv" download="live_trajectory.csv" style="text-decoration:none; display:inline-flex; align-items:center; gap:4px; font-weight:600;">📥 Export CSV</a>
+          <button class="btn" id="btn-sim-walk" style="background:rgba(56, 189, 248, 0.15); border-color:#38bdf8; color:#38bdf8; font-weight:600;">🚶 Run 3D Walk Simulation</button>
+        </div>
+
+        <div style="display:flex; align-items:center; gap:16px; font-family:var(--mono); font-size:13px;">
+          <div style="display:inline-flex; align-items:center; gap:6px; padding:3px 8px; background:rgba(56, 189, 248, 0.12); border:1px solid rgba(56, 189, 248, 0.3); border-radius:6px; font-size:11px; font-weight:700; color:#38bdf8;">⚡ 15-State EKF Filter Active</div>
+          <div>FPS: <strong id="live-fps" style="color:var(--primary);">0.0</strong></div>
+          <div>Visible Markers: <strong id="live-markers-count" style="color:var(--success);">None</strong></div>
+          <div>KLT Points: <strong id="live-features-count" style="color:var(--warning);">0</strong></div>
+        </div>
+      </div>
+
+      <!-- Mobile Connection Guidance Banner -->
+      <div id="phone-conn-banner"
+        style="margin-top:14px; background:rgba(15, 23, 42, 0.90); border:1px solid rgba(56, 189, 248, 0.35); border-radius:12px; padding:12px 18px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:14px;">
+        <div style="display:flex; align-items:center; gap:12px;">
+          <div style="width:36px; height:36px; border-radius:8px; background:rgba(56, 189, 248, 0.15); display:flex; align-items:center; justify-content:center; font-size:18px;">📱</div>
+          <div>
+            <div style="font-weight:700; font-size:14px; color:#38bdf8;">OnePlus Mobile App Stream Mode Active</div>
+            <div style="font-size:12px; color:#94a3b8;">Enter these parameters into your phone app and tap <strong style="color:#34d399;">Connect & Stream</strong>:</div>
+          </div>
+        </div>
+        <div style="display:flex; align-items:center; gap:16px; font-family:var(--mono); font-size:13px; background:#070a12; padding:8px 16px; border-radius:8px; border:1px solid rgba(255,255,255,0.08);">
+          <div>Host IP: <strong id="card-ip-val" style="color:#34d399;">10.251.27.133</strong></div>
+          <div>Port: <strong style="color:#f1f5f9;">8765</strong></div>
+          <div>Token: <strong id="card-tok-val" style="color:#fbbf24;">1234</strong></div>
+          <div id="card-status-pill" style="padding:2px 8px; border-radius:4px; font-size:11px; background:rgba(16, 185, 129, 0.15); color:#34d399; font-weight:700;">TCP LISTENING</div>
+        </div>
+      </div>
+
+      <!-- Live Dual Split Studio -->
+      <div class="live-split-grid">
+        <!-- LEFT: Live Camera Feed & Telemetry -->
+        <div class="live-panel">
+          <div class="live-panel-header">
+            <span style="font-size:13px; font-weight:600;">Live Camera Stream & Marker Detection</span>
+            <span class="status-badge" id="live-state-pill" style="font-size:11px; padding:2px 8px;">READY</span>
+          </div>
+          <div class="live-feed-container">
+            <img id="live-feed-img" src="/api/live/frame" alt="Live Camera Preview">
+          </div>
+          <div class="telemetry-card">
+            <div class="telem-row">
+              <span class="telem-label">3D Position (X, Y, Z)</span>
+              <span class="telem-val" id="live-pos-val">X: 0.00, Y: 0.00, Z: 1.50 m</span>
+            </div>
+            <div class="telem-row">
+              <span class="telem-label">Path Traveled</span>
+              <span class="telem-val" id="live-dist-val" style="color:var(--success); font-weight:700;">0.00 m</span>
+            </div>
+            <div class="telem-row">
+              <span class="telem-label">Movement Speed</span>
+              <span class="telem-val" id="live-speed-val" style="color:var(--warning);">0.00 m/s</span>
+            </div>
+            <div class="telem-row">
+              <span class="telem-label">Height Above Floor</span>
+              <span class="telem-val" id="live-elev-val">1.25 m</span>
+            </div>
+            <div class="telem-row">
+              <span class="telem-label">Camera Heading (Yaw)</span>
+              <span class="telem-val" id="live-yaw-val">0.0°</span>
+            </div>
+            <div class="telem-row">
+              <span class="telem-label">SLAM Tracking State</span>
+              <span class="telem-val" id="live-anchor-val" style="color:var(--success);">Searching for markers...</span>
+            </div>
+            <div class="telem-row">
+              <span class="telem-label">EKF Position Uncertainty (1-σ)</span>
+              <span class="telem-val" id="live-sigma-val" style="color:#38bdf8; font-weight:700;">±0.04 m</span>
+            </div>
+            <div class="telem-row">
+              <span class="telem-label">Captured Frame Count</span>
+              <span class="telem-val" id="live-frame-count">0 frames</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- RIGHT: Interactive 3D Room Projector -->
+        <div class="live-panel">
+          <div class="live-panel-header">
+            <div style="display:flex; align-items:center; gap:10px;">
+              <span style="font-size:13px; font-weight:600;">3D Room Model & Live Projected Trajectory</span>
+              <div class="toggle-chip active" id="chip-room-walls" onclick="toggleRoomWalls()">Walls</div>
+              <div class="toggle-chip active" id="chip-room-frustum" onclick="toggleRoomFrustum()">Sight Rays</div>
+            </div>
+            <div style="display:flex; gap:6px;">
+              <button class="btn" style="padding:4px 8px; font-size:11px;" onclick="setLiveCameraView('iso')">3D Iso</button>
+              <button class="btn" style="padding:4px 8px; font-size:11px;" onclick="setLiveCameraView('top')">Top View</button>
+              <button class="btn" style="padding:4px 8px; font-size:11px;" onclick="setLiveCameraView('follow')">Follow Cam</button>
+              <button class="btn" style="padding:4px 8px; font-size:11px;" onclick="resetLiveCamera()">Reset</button>
+            </div>
+          </div>
+
+          <div id="live-three-container" style="position:relative;">
+            <canvas id="live-three-canvas"></canvas>
+            <div class="viewer-overlay">
+              <span><strong>Room Frame:</strong> W {X: Red, Y: Green, Z: Blue}</span>
+              <span><strong>Traveled:</strong> <strong id="overlay-dist" style="color:#34d399;">0.00 m</strong></span>
+              <span><strong>Waypoints:</strong> <span id="live-traj-count">0</span></span>
+            </div>
+
+            <!-- Floating 2D Top-Down Path Radar Minimap -->
+            <div style="position:absolute; bottom:14px; right:14px; background:rgba(10, 15, 30, 0.94); border:1px solid rgba(56, 189, 248, 0.45); border-radius:10px; padding:10px 12px; z-index:10; pointer-events:auto; box-shadow:0 8px 24px rgba(0,0,0,0.65);">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; font-family:var(--font);">
+                <span style="font-size:10px; font-weight:700; color:#38bdf8; text-transform:uppercase; letter-spacing:0.5px;">📍 2D Motion Path Radar</span>
+                <span id="radar-dist-tag" style="font-size:10px; font-family:var(--mono); color:#34d399; font-weight:700;">0.00 m</span>
+              </div>
+              <canvas id="live-minimap-canvas" width="160" height="200" style="border-radius:6px; background:#050811; border:1px solid rgba(255,255,255,0.08); display:block;"></canvas>
+              <div style="display:flex; justify-content:space-between; margin-top:6px; font-size:10px; color:#94a3b8; font-family:var(--mono);">
+                <span>Room: 4×5m</span>
+                <span id="radar-speed-tag" style="color:#fbbf24;">0.0 m/s</span>
+              </div>
+            </div>
+
+            <div class="viewer-legend">
+              <div class="legend-item"><span class="legend-color" style="background:#00f5ff; box-shadow:0 0 8px #00f5ff;"></span><span>3D Motion Ribbon</span></div>
+              <div class="legend-item"><span class="legend-color" style="background:#10b981;"></span><span>Floor Grid Track</span></div>
+              <div class="legend-item"><span class="legend-color" style="background:#ef4444; border-radius:50%;"></span><span>Live Phone Position</span></div>
+              <div class="legend-item"><span class="legend-color" style="background:#ffffff; border:1px solid #38bdf8;"></span><span>Surveyed Wall Markers</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- TAB 2: RECORDED DATASETS & TRAJECTORIES   -->
+    <!-- ========================================== -->
+    <section id="tab-slam" class="tab-content">
+      <!-- Session Bar -->
+      <div
+        style="background:var(--card-bg); border:1px solid var(--card-border); border-radius:12px; padding:12px 18px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+        <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+          <span style="font-size:13px; font-weight:600; color:var(--text-muted);">Recorded Session:</span>
+          <select id="session-dropdown" style="min-width: 320px; font-weight:600;"></select>
+          <button class="btn" id="btn-reload-sessions">↻ Refresh</button>
+          <button class="btn btn-success" id="btn-open-explorer">📂 Open Folder</button>
+        </div>
+        <div style="display:flex; gap:10px;">
+          <button class="btn btn-primary" id="btn-process-slam">⚡ Run MSCKF SLAM</button>
+          <button class="btn btn-warning" id="btn-process-baseline">📉 Run Pure VIO Baseline</button>
+        </div>
+      </div>
+
+      <div class="cards-grid">
+        <div class="metric-card"><span class="title">Visual Updates</span><span class="value"
+            id="val-visual-updates">—</span><span class="sub">KLT feature tracks</span></div>
+        <div class="metric-card"><span class="title">ArUco Updates</span><span class="value" id="val-marker-updates"
+            style="color:var(--primary);">—</span><span class="sub">Fiducial keypoints</span></div>
+        <div class="metric-card"><span class="title">Mapped Markers</span><span class="value" id="val-mapped-markers"
+            style="color:var(--success);">—</span><span class="sub">3D room anchors</span></div>
+        <div class="metric-card"><span class="title">Tracking State</span><span class="value"
+            id="val-tracking-state">—</span><span class="sub" id="val-runtime">Runtime: —</span></div>
+      </div>
+
+      <!-- Recorded Dual Split Studio -->
+      <div class="live-split-grid">
+        <!-- LEFT: Recorded Video Player & Timeline Scrubber -->
+        <div class="live-panel">
+          <div class="live-panel-header">
+            <div style="display:flex; align-items:center; gap:8px;">
+              <span style="font-size:13px; font-weight:600;">Recorded Camera Stream & Playback</span>
+              <span class="status-badge" id="rec-play-pill" style="font-size:11px; padding:2px 8px; background:rgba(56,189,248,0.15); color:#38bdf8; border:1px solid rgba(56,189,248,0.3);">READY</span>
+            </div>
+            <div style="display:flex; align-items:center; gap:6px;">
+              <span style="font-size:11px; color:var(--text-muted);">Speed:</span>
+              <button class="btn btn-sm" id="btn-rec-speed" style="padding:2px 8px; font-size:11px; font-family:var(--mono);">1.0x</button>
+              <button class="btn btn-sm" id="btn-rec-loop" style="padding:2px 8px; font-size:11px;">🔁 Loop</button>
+            </div>
+          </div>
+
+          <!-- Video Viewport -->
+          <div class="live-feed-container" style="position:relative; background:#000;">
+            <img id="rec-video-frame" src="" alt="Session Frame" style="width:100%; height:100%; object-fit:contain; display:block;">
+            <div id="rec-no-video-overlay" style="position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; background:rgba(6,9,17,0.85); color:#94a3b8; font-size:13px;">
+              <div style="font-size:32px; margin-bottom:8px;">📹</div>
+              <div>Select a recorded session with video frames</div>
+            </div>
+            <!-- Video Overlay HUD -->
+            <div id="rec-video-hud" style="position:absolute; top:10px; left:10px; right:10px; display:flex; justify-content:space-between; pointer-events:none;">
+              <span id="rec-hud-state" style="background:rgba(15,23,42,0.85); border:1px solid rgba(56,189,248,0.4); padding:3px 8px; border-radius:4px; font-size:11px; font-family:var(--mono); color:#38bdf8;">EKF TRACKING</span>
+              <span id="rec-hud-frame" style="background:rgba(15,23,42,0.85); border:1px solid rgba(255,255,255,0.1); padding:3px 8px; border-radius:4px; font-size:11px; font-family:var(--mono); color:#e2e8f0;">Frame: 0 / 0</span>
+            </div>
+          </div>
+
+          <!-- Scrubbing Controls -->
+          <div style="padding:10px 14px; background:rgba(15,23,42,0.6); border-bottom:1px solid var(--card-border); display:flex; flex-direction:column; gap:8px;">
+            <div style="display:flex; align-items:center; gap:8px;">
+              <input type="range" class="video-slider" id="rec-video-slider" min="0" max="0" value="0" style="flex:1; cursor:pointer;">
+            </div>
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <div style="display:flex; align-items:center; gap:6px;">
+                <button class="btn btn-primary" id="btn-rec-play" style="padding:4px 12px; font-size:12px; font-weight:700;">▶ Play</button>
+                <button class="btn" id="btn-rec-prev" style="padding:4px 8px; font-size:12px;" title="Previous Frame">⏮</button>
+                <button class="btn" id="btn-rec-next" style="padding:4px 8px; font-size:12px;" title="Next Frame">⏭</button>
+                <button class="btn" id="btn-rec-reset" style="padding:4px 8px; font-size:12px;" title="Jump to Start">⏮ First</button>
+              </div>
+              <div style="font-family:var(--mono); font-size:12px; color:#38bdf8;" id="rec-frame-text">Frame: 0 / 0 (0.00s)</div>
+            </div>
+          </div>
+
+          <!-- Synchronized Telemetry Card -->
+          <div class="telemetry-card">
+            <div class="telem-row">
+              <span class="telem-label">3D Position (X, Y, Z)</span>
+              <span class="telem-val" id="rec-pos-val">X: 0.00, Y: 0.00, Z: 0.00 m</span>
+            </div>
+            <div class="telem-row">
+              <span class="telem-label">Path Distance Traveled</span>
+              <span class="telem-val" id="rec-dist-val" style="color:var(--success); font-weight:700;">0.00 m</span>
+            </div>
+            <div class="telem-row">
+              <span class="telem-label">Instantaneous Velocity</span>
+              <span class="telem-val" id="rec-speed-val" style="color:var(--warning);">0.00 m/s</span>
+            </div>
+            <div class="telem-row">
+              <span class="telem-label">Height Above Floor (Y)</span>
+              <span class="telem-val" id="rec-elev-val">1.25 m</span>
+            </div>
+            <div class="telem-row">
+              <span class="telem-label">EKF Tracking State</span>
+              <span class="telem-val" id="rec-state-val" style="color:var(--success);">TRACKING</span>
+            </div>
+            <div class="telem-row">
+              <span class="telem-label">Position Uncertainty (1-σ)</span>
+              <span class="telem-val" id="rec-sigma-val" style="color:#38bdf8; font-weight:700;">±0.04 m</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- RIGHT: Interactive 3D Room Trajectory Studio -->
+        <div class="live-panel">
+          <div class="live-panel-header">
+            <div style="display:flex; align-items:center; gap:8px;">
+              <span style="font-size:13px; font-weight:600;">Recorded 3D Room Trajectory & Landmark Map</span>
+              <div class="toggle-chip active" id="chip-rec-walls" onclick="toggleRecWalls()">Walls</div>
+              <div class="toggle-chip active" id="chip-rec-frustum" onclick="toggleRecFrustum()">Frustum</div>
+            </div>
+            <div style="display:flex; gap:6px;">
+              <button class="btn" style="padding:4px 8px; font-size:11px;" onclick="setRecordedCameraView('iso')">3D Iso</button>
+              <button class="btn" style="padding:4px 8px; font-size:11px;" onclick="setRecordedCameraView('top')">Top View</button>
+              <button class="btn" style="padding:4px 8px; font-size:11px;" onclick="setRecordedCameraView('follow')">Follow Phone</button>
+              <button class="btn" style="padding:4px 8px; font-size:11px;" onclick="resetRecordedCamera()">Reset</button>
+            </div>
+          </div>
+
+          <div id="threejs-container" style="position:relative;">
+            <canvas id="threejs-canvas"></canvas>
+            <div class="viewer-overlay">
+              <span><strong>Room Frame:</strong> W {X: Red, Y: Green, Z: Blue}</span>
+              <span><strong>Traveled:</strong> <strong id="rec-overlay-dist" style="color:#34d399;">0.00 m</strong></span>
+              <span><strong>Waypoints:</strong> <span id="rec-overlay-count">0</span></span>
+            </div>
+
+            <!-- Floating 2D Motion Path Radar Minimap -->
+            <div style="position:absolute; bottom:14px; right:14px; background:rgba(10, 15, 30, 0.94); border:1px solid rgba(56, 189, 248, 0.45); border-radius:10px; padding:10px 12px; z-index:10; pointer-events:auto; box-shadow:0 8px 24px rgba(0,0,0,0.65);">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; font-family:var(--font);">
+                <span style="font-size:10px; font-weight:700; color:#38bdf8; text-transform:uppercase; letter-spacing:0.5px;">📍 2D Motion Path Radar</span>
+                <span id="rec-radar-dist-tag" style="font-size:10px; font-family:var(--mono); color:#34d399; font-weight:700;">0.00 m</span>
+              </div>
+              <canvas id="rec-minimap-canvas" width="160" height="200" style="border-radius:6px; background:#050811; border:1px solid rgba(255,255,255,0.08); display:block;"></canvas>
+              <div style="display:flex; justify-content:space-between; margin-top:6px; font-size:10px; color:#94a3b8; font-family:var(--mono);">
+                <span>Room: 4×5m</span>
+                <span id="rec-radar-idx-tag" style="color:#fbbf24;">Pt: 0 / 0</span>
+              </div>
+            </div>
+
+            <div class="viewer-legend">
+              <div class="legend-item"><span class="legend-color" style="background:#00f5ff; box-shadow:0 0 8px #00f5ff;"></span><span>3D Motion Ribbon (Spline)</span></div>
+              <div class="legend-item"><span class="legend-color" style="background:#10b981;"></span><span>Floor Grid Track</span></div>
+              <div class="legend-item"><span class="legend-color" style="background:#fbbf24; border:1px dashed #fbbf24;"></span><span>Pure VIO Baseline</span></div>
+              <div class="legend-item"><span class="legend-color" style="background:#ef4444; border-radius:50%;"></span><span>Playback Phone Frustum</span></div>
+              <div class="legend-item"><span class="legend-color" style="background:#ffffff; border:1px solid #38bdf8;"></span><span>Surveyed Wall Markers</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Markers Table -->
+      <div class="table-container">
+        <div style="padding:14px 18px; font-weight:600; font-size:14px; border-bottom:1px solid var(--card-border);">
+          Fiducial Landmark Anchors in Common Room Frame
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Marker ID</th>
+              <th>Status</th>
+              <th>Position X (m)</th>
+              <th>Position Y (m)</th>
+              <th>Position Z (m)</th>
+              <th>Normal Vector (X, Y, Z)</th>
+              <th>Role</th>
+            </tr>
+          </thead>
+          <tbody id="marker-tbody">
+            <tr>
+              <td colspan="7" style="text-align:center; color:var(--text-muted);">No markers loaded for this session.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- TAB 3: BASELINE VS SLAM SCORECARD         -->
+    <!-- ========================================== -->
+    <section id="tab-scorecard" class="tab-content">
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Metric (Section 9)</th>
+              <th>MSCKF + ArUco Landmark SLAM</th>
+              <th>Baseline (Pure VIO without ArUco)</th>
+              <th>Relative Improvement</th>
+              <th>Theoretical Significance</th>
+            </tr>
+          </thead>
+          <tbody id="scorecard-tbody">
+            <tr>
+              <td colspan="5" style="text-align:center; padding:30px; color:var(--text-muted);">Loading evaluation
+                comparison...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- TAB 4: BENCHMARK EXPERIMENTS (5 SCENARIOS)-->
+    <!-- ========================================== -->
+    <section id="tab-experiments" class="tab-content">
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+        <div>
+          <h2 style="font-size:17px; font-weight:600;">Course Benchmark Experiments (Section 8)</h2>
+          <p style="font-size:13px; color:var(--text-muted);">Verify all 5 required experimental scenarios.</p>
+        </div>
+        <button class="btn btn-primary" onclick="runBenchmarkScenario('all')">🚀 Run All 5 Experiments</button>
+      </div>
+      <div class="exp-grid" id="experiments-grid"></div>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- TAB 5: VIDEO PLAYER                       -->
+    <!-- ========================================== -->
+    <section id="tab-video" class="tab-content">
+      <div
+        style="background:var(--card-bg); border:1px solid var(--card-border); border-radius:12px; padding:18px; display:flex; flex-direction:column; align-items:center; gap:14px; width:100%; max-width:800px; margin:0 auto;">
+        <div style="display:flex; justify-content:space-between; width:100%; align-items:center;">
+          <span style="font-weight:700; font-size:15px; color:#38bdf8;">🎬 High-Definition Camera Stream & Keypoint Inspection</span>
+          <span id="tab5-pill" class="status-badge" style="padding:2px 8px; font-size:11px;">READY</span>
+        </div>
+        <div style="width:100%; height:460px; background:#000; border-radius:8px; overflow:hidden; position:relative; display:flex; align-items:center; justify-content:center;">
+          <img id="player-img" src="" style="width:100%; height:100%; object-fit:contain;" alt="Camera Frame">
+          <div id="player-empty-hint" style="position:absolute; color:#94a3b8; font-size:14px; text-align:center;">
+            Select a session with recorded video frames
+          </div>
+        </div>
+        <div style="display:flex; flex-direction:column; gap:8px; width:100%;">
+          <input type="range" class="video-slider" id="player-slider" min="0" max="0" value="0" style="width:100%; cursor:pointer;">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <div style="display:flex; gap:8px; align-items:center;">
+              <button class="btn btn-primary" id="btn-play-pause">▶ Play</button>
+              <button class="btn" id="btn-tab5-prev" style="padding:4px 8px;">⏮</button>
+              <button class="btn" id="btn-tab5-next" style="padding:4px 8px;">⏭</button>
+              <button class="btn" id="btn-tab5-speed" style="padding:4px 8px; font-family:var(--mono);">1.0x</button>
+            </div>
+            <span style="font-family:var(--mono); font-size:13px; color:#38bdf8;" id="player-frame-info">Frame 0 / 0</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- TAB 6: PHONE SENSORS ANALYTICS            -->
+    <!-- ========================================== -->
+    <section id="tab-sensors" class="tab-content">
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+        <div style="display:flex; align-items:center; gap:10px;">
+          <span style="font-size:13px; font-weight:600;">Sensor Stream:</span>
+          <select id="sensor-dropdown" style="min-width: 320px; font-weight:600;"></select>
+        </div>
+        <button class="btn" id="btn-download-csv">📥 Download Sensor CSV</button>
+      </div>
+      <div class="live-panel">
+        <div style="padding:18px;">
+          <canvas id="sensor-canvas" width="1200" height="340"
+            style="width:100%; height:340px; background:#070b14; border-radius:8px;"></canvas>
+        </div>
+      </div>
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Key</th>
+              <th>Sensor Name</th>
+              <th>Hardware Vendor</th>
+              <th>Samples</th>
+              <th>Duration (s)</th>
+              <th>Effective Rate (Hz)</th>
+            </tr>
+          </thead>
+          <tbody id="inventory-tbody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- TAB 7: ARUCO MARKER PRINT STUDIO          -->
+    <!-- ========================================== -->
+    <section id="tab-markers" class="tab-content">
+      <div
+        style="background:var(--card-bg); border:1px solid var(--card-border); border-radius:12px; padding:18px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+        <div>
+          <h2 style="font-size:16px; font-weight:600; color:#38bdf8;">ArUco Marker Print Studio (DICT_6X6_250)</h2>
+          <p style="font-size:13px; color:var(--text-muted); margin-top:4px;">
+            Standard 120×120 mm fiducial anchors for physical room walls. Print or display on phone/monitor for your camera to detect.
+          </p>
+        </div>
+        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+          <a class="btn" href="/api/markers/sheet" target="_blank" style="text-decoration:none; display:inline-flex; align-items:center; gap:4px; font-weight:600;">
+            📄 Printable Sheet (HTML)
+          </a>
+          <a class="btn" href="/api/markers/grid" target="_blank" download="all_markers_grid.png" style="text-decoration:none; display:inline-flex; align-items:center; gap:4px; font-weight:600;">
+            🖼️ All-in-One Grid (PNG)
+          </a>
+          <button class="btn btn-primary" onclick="window.print()">🖨️ Quick Print</button>
+        </div>
+      </div>
+      <div class="marker-preview-grid" id="marker-print-grid"></div>
+    </section>
+  </main>
+
+  <!-- JavaScript -->
+  <script>
+    // State
+    let currentSession = '';
+    let sessionsList = [];
+    let isLiveCapturing = false;
+    let liveTimer = null;
+    let followCam = false;
+
+    // Three.js instances
+    // 1. Live Studio Scene
+    let liveScene, liveCamera, liveRenderer, liveControls;
+    let liveRoomBox, liveFrustumMesh, liveFrustumRays, liveTrajLine;
+    let liveFloorShadowLine, livePlumbLine, livePlumbTarget, liveStartMarker, liveBeadsPoints;
+    let liveMarkerMeshes = {};
+    let liveTrajPoints = [];
+    let showWalls = true, showFrustum = true;
+
+    // 2. Recorded Session Scene & Playback
+    let recScene, recCamera, recRenderer, recControls;
+    let recRoomBox, recFloorGrid, recSlamLine, recFloorShadowLine, recBaseLine, recGtLine, recMarkerGroup;
+    let recFrustumMesh, recFrustumRays, recPlumbLine, recPlumbTarget;
+    let recTrajectory = [];
+    let recFrames = [];
+    let recCurrentIndex = 0;
+    let recIsPlaying = false;
+    let recPlayTimer = null;
+    let recPlaySpeed = 1.0;
+    let recLoop = true;
+    let recFollowCam = false;
+    let showRecWalls = true, showRecFrustum = true;
+
+    // 3. Tab 5 Video Player State
+    let tab5Frames = [];
+    let tab5Index = 0;
+    let tab5Playing = false;
+    let tab5Timer = null;
+    let tab5Speed = 1.0;
+
+    window.addEventListener('DOMContentLoaded', () => {
+      initTabNavigation();
+      initLiveThreeJS();
+      initRecordedThreeJS();
+      fetchSessions();
+      fetchExperiments();
+      fetchMarkersList();
+      checkLiveStatus();
+      setInterval(checkLiveStatus, 1500);
+    });
+
+    function initTabNavigation() {
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+          document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+          btn.classList.add('active');
+          const tabId = btn.getAttribute('data-tab');
+          document.getElementById(tabId).classList.add('active');
+          if (tabId === 'tab-live') { onLiveResize(); setTimeout(onLiveResize, 60); }
+          if (tabId === 'tab-slam') { onRecResize(); setTimeout(onRecResize, 60); }
+          if (tabId === 'tab-video' && currentSession) { updateTab5Player(currentSession); }
+        });
+      });
+    }
+
+    // ==========================================
+    // THREE.JS: LIVE 3D ROOM & TRAJECTORY ENGINE
+    // ==========================================
+    function initLiveThreeJS() {
+      const container = document.getElementById('live-three-container');
+      const canvas = document.getElementById('live-three-canvas');
+      if (!window.THREE) return;
+
+      liveScene = new THREE.Scene();
+      liveScene.background = new THREE.Color(0x060911);
+
+      const w = container.clientWidth || 640;
+      const h = container.clientHeight || 560;
+      liveCamera = new THREE.PerspectiveCamera(45, w / h, 0.05, 50);
+      liveCamera.position.set(3.5, 3.2, -1.8);
+      liveCamera.up.set(0, 1, 0);
+
+      liveRenderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true });
+      liveRenderer.setSize(w, h);
+      liveRenderer.setPixelRatio(window.devicePixelRatio || 1);
+
+      if (window.THREE.OrbitControls) {
+        liveControls = new THREE.OrbitControls(liveCamera, liveRenderer.domElement);
+        liveControls.enableDamping = true;
+        liveControls.dampingFactor = 0.06;
+        liveControls.target.set(0, 0, 2.5);
+      }
+
+      // 1. Metric Floor Grid (Z: 0 to 5, X: -2 to +2)
+      const floorGrid = new THREE.GridHelper(5.0, 25, 0x38bdf8, 0x1e293b);
+      floorGrid.position.set(0, -1.25, 2.5);
+      liveScene.add(floorGrid);
+
+      // 2. 3D Room Boundary Box (Width: 4m, Height: 2.5m, Length: 5m)
+      const roomGeom = new THREE.BoxGeometry(4.0, 2.5, 5.0);
+      const roomEdges = new THREE.EdgesGeometry(roomGeom);
+      liveRoomBox = new THREE.LineSegments(roomEdges, new THREE.LineBasicMaterial({ color: 0x38bdf8, opacity: 0.35, transparent: true }));
+      liveRoomBox.position.set(0, 0, 2.5);
+      liveScene.add(liveRoomBox);
+
+      // 3. Wall ArUco Markers
+      buildRoomMarkers();
+
+      // 4. Live Camera Frustum Mesh
+      buildLiveCameraFrustum();
+
+      // 5. Live Trajectory Line (Glowing 3D Ribbon)
+      const trajGeom = new THREE.BufferGeometry();
+      const trajMat = new THREE.LineBasicMaterial({ color: 0x00f5ff, linewidth: 3 });
+      liveTrajLine = new THREE.Line(trajGeom, trajMat);
+      liveScene.add(liveTrajLine);
+
+      // 6. Floor Shadow Line (Ground projection at Y = -1.24)
+      const shadowGeom = new THREE.BufferGeometry();
+      const shadowMat = new THREE.LineBasicMaterial({ color: 0x10b981, transparent: true, opacity: 0.7, linewidth: 2 });
+      liveFloorShadowLine = new THREE.Line(shadowGeom, shadowMat);
+      liveScene.add(liveFloorShadowLine);
+
+      // 7. Vertical Plumb Line (Laser drop from phone position to floor)
+      const plumbGeom = new THREE.BufferGeometry();
+      const plumbMat = new THREE.LineBasicMaterial({ color: 0xef4444, transparent: true, opacity: 0.85 });
+      livePlumbLine = new THREE.Line(plumbGeom, plumbMat);
+      liveScene.add(livePlumbLine);
+
+      // 8. Floor Target (Pulsing ring directly below phone)
+      const ringGeom = new THREE.RingGeometry(0.08, 0.15, 24);
+      ringGeom.rotateX(-Math.PI / 2);
+      const ringMat = new THREE.MeshBasicMaterial({ color: 0xef4444, side: THREE.DoubleSide, transparent: true, opacity: 0.85 });
+      livePlumbTarget = new THREE.Mesh(ringGeom, ringMat);
+      livePlumbTarget.position.set(0, -1.24, 1.5);
+      liveScene.add(livePlumbTarget);
+
+      // 9. Start Beacon (Green beacon at initial point)
+      const startGeom = new THREE.CylinderGeometry(0.08, 0.02, 0.28, 16);
+      startGeom.translate(0, 0.14, 0);
+      const startMat = new THREE.MeshBasicMaterial({ color: 0x22c55e });
+      liveStartMarker = new THREE.Mesh(startGeom, startMat);
+      liveStartMarker.position.set(0, -1.24, 1.5);
+      liveStartMarker.visible = false;
+      liveScene.add(liveStartMarker);
+
+      // 10. Waypoint beads along trajectory
+      const beadsGeom = new THREE.BufferGeometry();
+      const beadsMat = new THREE.PointsMaterial({ color: 0x38bdf8, size: 0.05 });
+      liveBeadsPoints = new THREE.Points(beadsGeom, beadsMat);
+      liveScene.add(liveBeadsPoints);
+
+      // Lights
+      const ambient = new THREE.AmbientLight(0xffffff, 0.9);
+      liveScene.add(ambient);
+
+      window.addEventListener('resize', onLiveResize);
+      animateLiveThree();
+    }
+
+    function buildRoomMarkers() {
+      // Standard room markers at surveyed poses
+      const markers = [
+        { id: 0, pos: [0.0, 0.0, 4.5], norm: [0, 0, -1], label: 'M0 (Front)' },
+        { id: 1, pos: [1.2, 0.25, 4.5], norm: [0, 0, -1], label: 'M1 (Front R)' },
+        { id: 2, pos: [2.0, 0.0, 2.5], norm: [-1, 0, 0], label: 'M2 (Right)' },
+        { id: 3, pos: [0.0, 0.0, 0.5], norm: [0, 0, 1], label: 'M3 (Back)' },
+        { id: 4, pos: [-2.0, 0.0, 2.5], norm: [1, 0, 0], label: 'M4 (Left)' },
+        { id: 5, pos: [-1.8, 0.2, 3.8], norm: [0.707, 0, -0.707], label: 'M5 (Corner)' }
+      ];
+
+      markers.forEach(m => {
+        const group = new THREE.Group();
+        group.position.set(m.pos[0], m.pos[1], m.pos[2]);
+
+        // Outer white border
+        const outer = new THREE.Mesh(new THREE.PlaneGeometry(0.24, 0.24), new THREE.MeshBasicMaterial({ color: 0xffffff, side: THREE.DoubleSide }));
+        // Inner black square
+        const inner = new THREE.Mesh(new THREE.PlaneGeometry(0.18, 0.18), new THREE.MeshBasicMaterial({ color: 0x000000, side: THREE.DoubleSide }));
+        inner.position.z = 0.002;
+        outer.add(inner);
+
+        // Highlight ring (turns green when in view)
+        const ring = new THREE.Mesh(new THREE.RingGeometry(0.13, 0.16, 16), new THREE.MeshBasicMaterial({ color: 0x10b981, side: THREE.DoubleSide, transparent: true, opacity: 0.0 }));
+        ring.position.z = 0.003;
+        outer.add(ring);
+
+        // Rotate plane to match wall normal
+        const normal = new THREE.Vector3(m.norm[0], m.norm[1], m.norm[2]);
+        outer.quaternion.setFromUnitVectors(new THREE.Vector3(0, 0, 1), normal);
+
+        group.add(outer);
+        liveScene.add(group);
+        liveMarkerMeshes[m.id] = { group: group, ring: ring };
+      });
+    }
+
+    function buildLiveCameraFrustum() {
+      // 3D Camera frustum cone
+      const coneGeom = new THREE.ConeGeometry(0.18, 0.35, 4);
+      coneGeom.rotateX(Math.PI / 2);
+      const wire = new THREE.WireframeGeometry(coneGeom);
+      liveFrustumMesh = new THREE.LineSegments(wire, new THREE.LineBasicMaterial({ color: 0x38bdf8, linewidth: 2 }));
+      liveScene.add(liveFrustumMesh);
+
+      // Frustum projection rays
+      const raysGeom = new THREE.ConeGeometry(0.65, 1.8, 4);
+      raysGeom.rotateX(Math.PI / 2);
+      raysGeom.translate(0, 0, 0.9);
+      const raysMat = new THREE.MeshBasicMaterial({ color: 0x38bdf8, transparent: true, opacity: 0.12, wireframe: false, side: THREE.DoubleSide });
+      liveFrustumRays = new THREE.Mesh(raysGeom, raysMat);
+      liveFrustumMesh.add(liveFrustumRays);
+    }
+
+    function animateLiveThree() {
+      requestAnimationFrame(animateLiveThree);
+      if (liveControls) liveControls.update();
+      if (liveRenderer && liveScene && liveCamera) {
+        liveRenderer.render(liveScene, liveCamera);
+      }
+    }
+
+    function onLiveResize() {
+      const container = document.getElementById('live-three-container');
+      if (liveCamera && liveRenderer && container) {
+        liveCamera.aspect = container.clientWidth / container.clientHeight;
+        liveCamera.updateProjectionMatrix();
+        liveRenderer.setSize(container.clientWidth, container.clientHeight);
+      }
+    }
+
+    function setLiveCameraView(view) {
+      if (!liveCamera || !liveControls) return;
+      followCam = false;
+      if (view === 'iso') {
+        liveCamera.position.set(3.5, 3.2, -1.8);
+        liveControls.target.set(0, 0, 2.5);
+      } else if (view === 'top') {
+        liveCamera.position.set(0.01, 6.5, 2.5);
+        liveControls.target.set(0, 0, 2.5);
+      } else if (view === 'follow') {
+        followCam = true;
+      }
+      liveControls.update();
+    }
+
+    function resetLiveCamera() {
+      setLiveCameraView('iso');
+    }
+
+    function toggleRoomWalls() {
+      showWalls = !showWalls;
+      if (liveRoomBox) liveRoomBox.visible = showWalls;
+      document.getElementById('chip-room-walls').classList.toggle('active', showWalls);
+    }
+
+    function toggleRoomFrustum() {
+      showFrustum = !showFrustum;
+      if (liveFrustumRays) liveFrustumRays.visible = showFrustum;
+      document.getElementById('chip-room-frustum').classList.toggle('active', showFrustum);
+    }
+
+    // ==========================================
+    // LIVE STREAMING & POLLING LOOP
+    // ==========================================
+    document.getElementById('btn-live-toggle').addEventListener('click', async () => {
+      const src = document.getElementById('live-source-select').value;
+      if (!isLiveCapturing) {
+        // Start Live Capturing
+        const res = await fetch('/api/live/start', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ source: src })
+        });
+        const data = await res.json();
+        isLiveCapturing = true;
+        updateLiveButtonState();
+        startLivePolling();
+      } else {
+        // Stop
+        await fetch('/api/live/stop', { method: 'POST' });
+        isLiveCapturing = false;
+        updateLiveButtonState();
+        stopLivePolling();
+      }
+    });
+
+    document.getElementById('btn-live-clear').addEventListener('click', async () => {
+      await fetch('/api/live/clear', { method: 'POST' });
+      liveTrajPoints = [];
+      if (liveTrajLine) liveTrajLine.geometry.setFromPoints([]);
+      if (liveFloorShadowLine) liveFloorShadowLine.geometry.setFromPoints([]);
+      if (liveBeadsPoints) liveBeadsPoints.geometry.setFromPoints([]);
+      if (livePlumbLine) livePlumbLine.geometry.setFromPoints([]);
+      if (liveStartMarker) liveStartMarker.visible = false;
+      document.getElementById('live-traj-count').innerText = '0';
+      const canvas = document.getElementById('live-minimap-canvas');
+      if (canvas) {
+        const ctx = canvas.getContext('2d');
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+      }
+    });
+
+    const simWalkBtn = document.getElementById('btn-sim-walk');
+    if (simWalkBtn) {
+      simWalkBtn.addEventListener('click', async () => {
+        const sel = document.getElementById('live-source-select');
+        if (sel) {
+          sel.value = 'simulated_walk';
+          sel.dispatchEvent(new Event('change'));
+        }
+      });
+    }
+
+    const btnLiveSave = document.getElementById('btn-live-save');
+    if (btnLiveSave) {
+      btnLiveSave.addEventListener('click', async () => {
+        btnLiveSave.disabled = true;
+        btnLiveSave.innerText = '💾 Saving Dataset...';
+        try {
+          const res = await fetch('/api/live/save', { method: 'POST' });
+          const data = await res.json();
+          if (data.status === 'saved') {
+            alert(`✅ Dataset Successfully Stored!\n\nFolder: recordings/${data.session_id}\nFrames: ${data.frames}\nPath Traveled: ${data.distance_m} m\n\nYour trajectory data has been preserved and is now available in Tab 2!`);
+            if (typeof loadSessions === 'function') loadSessions();
+          } else {
+            alert('Failed to save dataset: ' + (data.error || 'Unknown error'));
+          }
+        } catch (e) {
+          alert('Error saving dataset: ' + e);
+        } finally {
+          btnLiveSave.disabled = false;
+          btnLiveSave.innerText = '💾 Save Captured Dataset';
+        }
+      });
+    }
+
+    function updateLiveButtonState() {
+      const btn = document.getElementById('btn-live-toggle');
+      const dot = document.getElementById('live-dot');
+      const text = document.getElementById('live-text');
+      const pill = document.getElementById('live-state-pill');
+
+      if (isLiveCapturing) {
+        btn.innerText = '⏹ STOP LIVE CAPTURE';
+        btn.className = 'btn btn-danger';
+        dot.className = 'status-dot live';
+        text.innerText = 'Live: Active (30 FPS)';
+        pill.innerText = 'LIVE STREAMING';
+        pill.style.background = 'rgba(239, 68, 68, 0.2)';
+        pill.style.color = '#f87171';
+      } else {
+        btn.innerText = '▶ START LIVE CAPTURE';
+        btn.className = 'btn btn-live-start';
+        dot.className = 'status-dot';
+        text.innerText = 'Live: Ready';
+        pill.innerText = 'IDLE';
+        pill.style.background = 'rgba(255, 255, 255, 0.05)';
+        pill.style.color = '#94a3b8';
+      }
+    }
+
+    async function checkLiveStatus() {
+      try {
+        const res = await fetch('/api/live/state');
+        const st = await res.json();
+        if (st.running && !isLiveCapturing) {
+          isLiveCapturing = true;
+          updateLiveButtonState();
+          startLivePolling();
+        }
+      } catch (e) { }
+    }
+
+    let livePollingActive = false;
+    let livePollTimeout = null;
+    let liveImgLoading = false;
+
+    function startLivePolling() {
+      if (livePollingActive) return;
+      livePollingActive = true;
+      scheduleNextLivePoll(0);
+    }
+
+    function stopLivePolling() {
+      livePollingActive = false;
+      if (livePollTimeout) clearTimeout(livePollTimeout);
+      livePollTimeout = null;
+    }
+
+    function scheduleNextLivePoll(delayMs = 70) {
+      if (!livePollingActive) return;
+      livePollTimeout = setTimeout(async () => {
+        try {
+          await pollLiveCycle();
+        } catch (err) {
+        } finally {
+          if (livePollingActive) {
+            scheduleNextLivePoll(70);
+          }
+        }
+      }, delayMs);
+    }
+
+    window.addEventListener('DOMContentLoaded', async () => {
+      const img = document.getElementById('live-feed-img');
+      if (img) {
+        img.onload = () => { liveImgLoading = false; };
+        img.onerror = () => { liveImgLoading = false; };
+      }
+
+      // Auto-start live polling for Phone Stream
+      isLiveCapturing = true;
+      updateLiveButtonState();
+      startLivePolling();
+
+      // Fetch dynamic system IP and token
+      try {
+        const r = await fetch('/api/system/info');
+        const sys = await r.json();
+        const ipEl = document.getElementById('card-ip-val');
+        if (ipEl && sys.ip) ipEl.innerText = sys.ip;
+        const tokEl = document.getElementById('card-tok-val');
+        if (tokEl && sys.token) tokEl.innerText = sys.token;
+      } catch (e) { }
+    });
+
+    document.getElementById('live-source-select').addEventListener('change', async (e) => {
+      const src = e.target.value;
+      const banner = document.getElementById('phone-conn-banner');
+      if (banner) banner.style.display = src === 'phone' ? 'flex' : 'none';
+      await fetch('/api/live/start', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ source: src })
+      });
+      isLiveCapturing = true;
+      updateLiveButtonState();
+      startLivePolling();
+    });
+
+    async function pollLiveCycle() {
+      try {
+        // 1. Update Live Frame Image smoothly without pipeline stalls
+        if (!liveImgLoading) {
+          liveImgLoading = true;
+          const img = document.getElementById('live-feed-img');
+          if (img) img.src = '/api/live/frame?t=' + Date.now();
+        }
+
+        // 2. Fetch Live State JSON
+        const res = await fetch('/api/live/state');
+        const st = await res.json();
+
+        // Telemetry
+        document.getElementById('live-fps').innerText = st.fps.toFixed(1);
+        document.getElementById('live-markers-count').innerText = st.visible_markers.length ? `IDs [${st.visible_markers.join(', ')}]` : 'None';
+        document.getElementById('live-features-count').innerText = st.features_count;
+        document.getElementById('live-pos-val').innerText = `X: ${st.pos[0].toFixed(2)}, Y: ${st.pos[1].toFixed(2)}, Z: ${st.pos[2].toFixed(2)} m`;
+        document.getElementById('live-anchor-val').innerText = st.state;
+        const sigmaEl = document.getElementById('live-sigma-val');
+        if (sigmaEl) sigmaEl.innerText = st.sigmas ? `±${st.sigmas[0].toFixed(3)} m` : '±0.03 m';
+        document.getElementById('live-frame-count').innerText = `${st.total_frames} frames`;
+        document.getElementById('live-traj-count').innerText = st.trajectory_count;
+
+        const distEl = document.getElementById('live-dist-val');
+        if (distEl) distEl.innerText = `${(st.total_distance || 0).toFixed(2)} m`;
+        const speedEl = document.getElementById('live-speed-val');
+        if (speedEl) speedEl.innerText = `${(st.speed || 0).toFixed(2)} m/s`;
+        const elevEl = document.getElementById('live-elev-val');
+        if (elevEl) elevEl.innerText = `${(st.elevation || 1.25).toFixed(2)} m`;
+        const yawEl = document.getElementById('live-yaw-val');
+        if (yawEl) yawEl.innerText = `${(st.yaw_deg || 0).toFixed(1)}°`;
+        const overDist = document.getElementById('overlay-dist');
+        if (overDist) overDist.innerText = `${(st.total_distance || 0).toFixed(2)} m`;
+        const radarDist = document.getElementById('radar-dist-tag');
+        if (radarDist) radarDist.innerText = `${(st.total_distance || 0).toFixed(2)} m`;
+        const radarSpd = document.getElementById('radar-speed-tag');
+        if (radarSpd) radarSpd.innerText = `${(st.speed || 0).toFixed(1)} m/s`;
+
+        const pill = document.getElementById('live-state-pill');
+        const cardStatus = document.getElementById('card-status-pill');
+        if (st.source === 'phone') {
+          if (st.fps > 0) {
+            if (pill) {
+              pill.innerText = `PHONE ACTIVE (${st.fps.toFixed(1)} FPS)`;
+              pill.style.background = 'rgba(16, 185, 129, 0.2)';
+              pill.style.color = '#34d399';
+            }
+            if (cardStatus) {
+              cardStatus.innerText = `STREAMING • ${st.fps.toFixed(1)} FPS`;
+              cardStatus.style.background = 'rgba(16, 185, 129, 0.2)';
+              cardStatus.style.color = '#34d399';
+            }
+          } else {
+            if (pill) {
+              pill.innerText = 'WAITING FOR PHONE STREAM';
+              pill.style.background = 'rgba(251, 191, 36, 0.15)';
+              pill.style.color = '#fbbf24';
+            }
+            if (cardStatus) {
+              cardStatus.innerText = 'TCP LISTENING (0.0.0.0:8765)';
+              cardStatus.style.background = 'rgba(251, 191, 36, 0.15)';
+              cardStatus.style.color = '#fbbf24';
+            }
+          }
+        }
+
+        // 3. Update 3D Camera Frustum Pose
+        if (liveFrustumMesh) {
+          liveFrustumMesh.position.set(st.pos[0], st.pos[1], st.pos[2]);
+          liveFrustumMesh.quaternion.set(st.quat[0], st.quat[1], st.quat[2], st.quat[3]);
+
+          // Color sight cone based on anchor state
+          if (liveFrustumRays) {
+            const isAnchored = st.state.includes('ANCHORED');
+            liveFrustumRays.material.color.setHex(isAnchored ? 0x10b981 : 0x38bdf8);
+          }
+        }
+
+        // 4. Update Live Trajectory Path & Visual Enhancements
+        if (window.THREE && liveScene) {
+          const px = Math.max(-2.2, Math.min(2.2, st.pos[0]));
+          const py = Math.max(-1.15, Math.min(1.15, st.pos[1]));
+          const pz = Math.max(-0.2, Math.min(5.2, st.pos[2]));
+          const currentVec = new THREE.Vector3(px, py, pz);
+
+          if (liveTrajPoints.length === 0 && st.recent_trajectory && st.recent_trajectory.length > 0) {
+            liveTrajPoints = st.recent_trajectory.map(p => new THREE.Vector3(
+              Math.max(-2.0, Math.min(2.0, p.x)),
+              Math.max(-1.15, Math.min(1.15, p.y)),
+              Math.max(0.1, Math.min(4.9, p.z))
+            ));
+          } else {
+            // Filter out any stale outlier points from previous runaway drift
+            liveTrajPoints = liveTrajPoints.filter(p => Math.abs(p.x) <= 2.8 && p.z >= -0.5 && p.z <= 5.5);
+            liveTrajPoints.push(currentVec);
+            if (liveTrajPoints.length > 800) liveTrajPoints.shift();
+          }
+
+          if (liveTrajLine) {
+            liveTrajLine.geometry.setFromPoints(liveTrajPoints);
+          }
+
+          // Floor Shadow Trail (Projected at Y = -1.24)
+          if (liveFloorShadowLine) {
+            const shadowPoints = liveTrajPoints.map(p => new THREE.Vector3(p.x, -1.24, p.z));
+            liveFloorShadowLine.geometry.setFromPoints(shadowPoints);
+          }
+
+          // Waypoint Beads
+          if (liveBeadsPoints) {
+            const beadPts = liveTrajPoints.filter((_, idx) => idx % 4 === 0);
+            liveBeadsPoints.geometry.setFromPoints(beadPts);
+          }
+
+          // Vertical Plumb Line & Floor Target
+          if (livePlumbLine && livePlumbTarget) {
+            const plumbPoints = [
+              currentVec,
+              new THREE.Vector3(px, -1.24, pz)
+            ];
+            livePlumbLine.geometry.setFromPoints(plumbPoints);
+            livePlumbTarget.position.set(px, -1.24, pz);
+          }
+
+          // Start Beacon
+          if (liveStartMarker && liveTrajPoints.length > 0) {
+            const startPt = liveTrajPoints[0];
+            liveStartMarker.position.set(startPt.x, -1.24, startPt.z);
+            liveStartMarker.visible = true;
+          }
+        }
+
+        // 5. Draw 2D Top-Down Path Radar
+        drawLiveMinimap(st);
+
+        // 6. Highlight Visible Wall Markers
+        Object.keys(liveMarkerMeshes).forEach(mid => {
+          const m = liveMarkerMeshes[mid];
+          const isVisible = st.visible_markers.includes(parseInt(mid));
+          m.ring.material.opacity = isVisible ? 0.9 : 0.0;
+        });
+
+        // Follow Cam Mode
+        if (followCam && liveCamera && liveControls) {
+          liveCamera.position.set(st.pos[0] + 0.8, st.pos[1] + 1.2, st.pos[2] - 1.5);
+          liveControls.target.set(st.pos[0], st.pos[1], st.pos[2]);
+          liveControls.update();
+        }
+
+      } catch (e) {
+        console.error('pollLiveCycle error:', e);
+      }
+    }
+
+    // ==========================================
+    // 2D TOP-DOWN PATH RADAR MINIMAP
+    // ==========================================
+    function drawLiveMinimap(st) {
+      const canvas = document.getElementById('live-minimap-canvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      const w = canvas.width;
+      const h = canvas.height;
+
+      ctx.clearRect(0, 0, w, h);
+
+      // Margins & Dimensions (Room 4m wide: X in [-2, +2], 5m deep: Z in [0, 5])
+      const padX = 14, padY = 16;
+      const drawW = w - 2 * padX;
+      const drawH = h - 2 * padY;
+
+      function toScreen(x, z) {
+        // Clamp strictly to room bounds [-2.0, 2.0] and [0.0, 5.0] so points never render off-canvas
+        const cx = Math.max(-2.0, Math.min(2.0, Number.isFinite(x) ? x : 0.0));
+        const cz = Math.max(0.0, Math.min(5.0, Number.isFinite(z) ? z : 2.5));
+        const sx = padX + ((cx + 2.0) / 4.0) * drawW;
+        const sy = padY + (1.0 - (cz / 5.0)) * drawH;
+        return [sx, sy];
+      }
+
+      // 1. Dark Room Floor Background
+      ctx.fillStyle = '#070c18';
+      ctx.fillRect(padX, padY, drawW, drawH);
+
+      // 2. 1-Meter Metric Grid Lines
+      ctx.lineWidth = 1;
+      ctx.strokeStyle = 'rgba(56, 189, 248, 0.12)';
+      // Vertical grid (X = -1, 0, 1)
+      [-1, 0, 1].forEach(gx => {
+        const [gxScreen] = toScreen(gx, 0);
+        ctx.beginPath();
+        ctx.moveTo(gxScreen, padY);
+        ctx.lineTo(gxScreen, padY + drawH);
+        ctx.stroke();
+      });
+      // Horizontal grid (Z = 1, 2, 3, 4)
+      [1, 2, 3, 4].forEach(gz => {
+        const [, gzScreen] = toScreen(0, gz);
+        ctx.beginPath();
+        ctx.moveTo(padX, gzScreen);
+        ctx.lineTo(padX + drawW, gzScreen);
+        ctx.stroke();
+      });
+
+      // 3. Room Boundary Walls
+      ctx.strokeStyle = 'rgba(56, 189, 248, 0.45)';
+      ctx.lineWidth = 1.5;
+      ctx.strokeRect(padX, padY, drawW, drawH);
+
+      // Front & Back Wall Labels
+      ctx.fillStyle = '#64748b';
+      ctx.font = '8px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('FRONT (Z=5m)', w / 2, padY - 5);
+      ctx.fillText('DOOR (Z=0m)', w / 2, h - 4);
+
+      // 4. Wall ArUco Markers
+      const markers = [
+        { id: 0, x: 0.0, z: 4.5, label: 'M0' },
+        { id: 1, x: 1.2, z: 4.5, label: 'M1' },
+        { id: 2, x: 2.0, z: 2.5, label: 'M2' },
+        { id: 3, x: 0.0, z: 0.5, label: 'M3' },
+        { id: 4, x: -2.0, z: 2.5, label: 'M4' },
+        { id: 5, x: -1.8, z: 3.8, label: 'M5' }
+      ];
+
+      markers.forEach(m => {
+        const [mx, my] = toScreen(m.x, m.z);
+        const isVis = st.visible_markers && st.visible_markers.includes(m.id);
+
+        if (isVis) {
+          // Glowing green detection ring
+          ctx.beginPath();
+          ctx.arc(mx, my, 7, 0, Math.PI * 2);
+          ctx.fillStyle = 'rgba(16, 185, 129, 0.35)';
+          ctx.fill();
+          ctx.strokeStyle = '#10b981';
+          ctx.lineWidth = 1.5;
+          ctx.stroke();
+        }
+
+        // Marker box
+        ctx.fillStyle = isVis ? '#10b981' : '#ffffff';
+        ctx.fillRect(mx - 3, my - 3, 6, 6);
+
+        // Marker ID label
+        ctx.fillStyle = isVis ? '#34d399' : '#94a3b8';
+        ctx.font = 'bold 8px monospace';
+        ctx.fillText(m.label, mx + 8, my + 3);
+      });
+
+      // 5. Traveled Trajectory Path
+      if (liveTrajPoints.length > 1) {
+        // Shadow path
+        ctx.beginPath();
+        const [s0x, s0y] = toScreen(liveTrajPoints[0].x, liveTrajPoints[0].z);
+        ctx.moveTo(s0x, s0y);
+        for (let i = 1; i < liveTrajPoints.length; i++) {
+          const [px, py] = toScreen(liveTrajPoints[i].x, liveTrajPoints[i].z);
+          ctx.lineTo(px, py);
+        }
+        ctx.strokeStyle = 'rgba(0, 245, 255, 0.35)';
+        ctx.lineWidth = 4;
+        ctx.stroke();
+
+        // Sharp neon cyan track
+        ctx.strokeStyle = '#00f5ff';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        // 6. Start Waypoint
+        ctx.beginPath();
+        ctx.arc(s0x, s0y, 4, 0, Math.PI * 2);
+        ctx.fillStyle = '#22c55e';
+        ctx.fill();
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 1;
+        ctx.stroke();
+        ctx.fillStyle = '#22c55e';
+        ctx.font = 'bold 7px sans-serif';
+        ctx.fillText('START', s0x, s0y - 6);
+      }
+
+      // 7. Current Position & Direction
+      const [curX, curY] = toScreen(st.pos[0], st.pos[2]);
+
+      // Pulsing position beacon
+      ctx.beginPath();
+      ctx.arc(curX, curY, 6, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(239, 68, 68, 0.4)';
+      ctx.fill();
+
+      ctx.beginPath();
+      ctx.arc(curX, curY, 3.5, 0, Math.PI * 2);
+      ctx.fillStyle = '#ef4444';
+      ctx.fill();
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 1.2;
+      ctx.stroke();
+
+      // Heading arrow from yaw
+      const yawRad = (st.yaw_deg || 0) * (Math.PI / 180);
+      const arrowLen = 14;
+      const headX = curX + Math.sin(yawRad) * arrowLen;
+      const headY = curY - Math.cos(yawRad) * arrowLen;
+
+      ctx.beginPath();
+      ctx.moveTo(curX, curY);
+      ctx.lineTo(headX, headY);
+      ctx.strokeStyle = '#fbbf24';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      // Arrow head
+      ctx.beginPath();
+      ctx.arc(headX, headY, 2.5, 0, Math.PI * 2);
+      ctx.fillStyle = '#fbbf24';
+      ctx.fill();
+    }
+
+    // ==========================================
+    // THREE.JS: RECORDED SESSIONS VIEWER
+    // ==========================================
+    function initRecordedThreeJS() {
+      const container = document.getElementById('threejs-container');
+      const canvas = document.getElementById('threejs-canvas');
+      if (!window.THREE || !canvas || !container) return;
+
+      recScene = new THREE.Scene();
+      recScene.background = new THREE.Color(0x060911);
+
+      const w = container.clientWidth || 640;
+      const h = container.clientHeight || 560;
+      recCamera = new THREE.PerspectiveCamera(45, w / h, 0.05, 50);
+      recCamera.position.set(3.2, 3.2, -1.5);
+      recCamera.up.set(0, 1, 0);
+
+      recRenderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true });
+      recRenderer.setSize(w, h);
+      recRenderer.setPixelRatio(window.devicePixelRatio || 1);
+
+      if (window.THREE.OrbitControls) {
+        recControls = new THREE.OrbitControls(recCamera, recRenderer.domElement);
+        recControls.enableDamping = true;
+        recControls.dampingFactor = 0.06;
+        recControls.target.set(0, 0, 2.5);
+      }
+
+      // Room Box & Grid
+      recFloorGrid = new THREE.GridHelper(5.0, 25, 0x38bdf8, 0x1e293b);
+      recFloorGrid.position.set(0, -1.25, 2.5);
+      recScene.add(recFloorGrid);
+
+      const roomGeom = new THREE.BoxGeometry(4.0, 2.5, 5.0);
+      const roomEdges = new THREE.EdgesGeometry(roomGeom);
+      recRoomBox = new THREE.LineSegments(roomEdges, new THREE.LineBasicMaterial({ color: 0x38bdf8, opacity: 0.25, transparent: true }));
+      recScene.add(recRoomBox);
+
+      // Playback Camera Frustum & Sight Cone
+      const coneGeom = new THREE.ConeGeometry(0.18, 0.35, 4);
+      coneGeom.rotateX(Math.PI / 2);
+      const wireGeom = new THREE.WireframeGeometry(coneGeom);
+      recFrustumMesh = new THREE.LineSegments(wireGeom, new THREE.LineBasicMaterial({ color: 0xef4444, linewidth: 2 }));
+      recFrustumMesh.position.set(0, 0, 1.5);
+      recScene.add(recFrustumMesh);
+
+      const raysGeom = new THREE.ConeGeometry(0.55, 1.6, 4);
+      raysGeom.rotateX(Math.PI / 2);
+      const raysMat = new THREE.MeshBasicMaterial({ color: 0xef4444, transparent: true, opacity: 0.12, wireframe: false });
+      recFrustumRays = new THREE.Mesh(raysGeom, raysMat);
+      recFrustumMesh.add(recFrustumRays);
+
+      // Plumb line down to floor
+      const plumbGeom = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0, 0, 1.5), new THREE.Vector3(0, -1.24, 1.5)]);
+      recPlumbLine = new THREE.Line(plumbGeom, new THREE.LineDashedMaterial({ color: 0xef4444, dashSize: 0.04, gapSize: 0.03 }));
+      recPlumbLine.computeLineDistances();
+      recScene.add(recPlumbLine);
+
+      // Plumb ground target circle
+      const circleGeom = new THREE.RingGeometry(0.04, 0.07, 16);
+      circleGeom.rotateX(-Math.PI / 2);
+      recPlumbTarget = new THREE.Mesh(circleGeom, new THREE.MeshBasicMaterial({ color: 0xef4444, side: THREE.DoubleSide }));
+      recPlumbTarget.position.set(0, -1.24, 1.5);
+      recScene.add(recPlumbTarget);
+
+      recMarkerGroup = new THREE.Group();
+      recScene.add(recMarkerGroup);
+
+      recScene.add(new THREE.AmbientLight(0xffffff, 0.9));
+      window.addEventListener('resize', onRecResize);
+      animateRecThree();
+      initRecPlaybackControls();
+    }
+
+    function animateRecThree() {
+      requestAnimationFrame(animateRecThree);
+      if (recFollowCam && recFrustumMesh && recControls) {
+        recControls.target.lerp(recFrustumMesh.position, 0.08);
+      }
+      if (recControls) recControls.update();
+      if (recRenderer && recScene && recCamera) {
+        recRenderer.render(recScene, recCamera);
+      }
+    }
+
+    function onRecResize() {
+      const container = document.getElementById('threejs-container');
+      if (recCamera && recRenderer && container) {
+        recCamera.aspect = container.clientWidth / container.clientHeight;
+        recCamera.updateProjectionMatrix();
+        recRenderer.setSize(container.clientWidth, container.clientHeight);
+      }
+    }
+
+    function toggleRecWalls() {
+      showRecWalls = !showRecWalls;
+      if (recRoomBox) recRoomBox.visible = showRecWalls;
+      document.getElementById('chip-rec-walls').classList.toggle('active', showRecWalls);
+    }
+
+    function toggleRecFrustum() {
+      showRecFrustum = !showRecFrustum;
+      if (recFrustumMesh) recFrustumMesh.visible = showRecFrustum;
+      if (recPlumbLine) recPlumbLine.visible = showRecFrustum;
+      if (recPlumbTarget) recPlumbTarget.visible = showRecFrustum;
+      document.getElementById('chip-rec-frustum').classList.toggle('active', showRecFrustum);
+    }
+
+    function setRecordedCameraView(view) {
+      if (!recCamera || !recControls) return;
+      if (view === 'iso') {
+        recFollowCam = false;
+        recCamera.position.set(3.2, 3.2, -1.5);
+        recControls.target.set(0, 0, 2.5);
+      } else if (view === 'top') {
+        recFollowCam = false;
+        recCamera.position.set(0.01, 6.2, 2.5);
+        recControls.target.set(0, 0, 2.5);
+      } else if (view === 'follow') {
+        recFollowCam = true;
+      }
+      recControls.update();
+    }
+    function resetRecordedCamera() { setRecordedCameraView('iso'); }
+
+    // ==========================================
+    // SESSIONS & PLAYBACK CONTROLS
+    // ==========================================
+    function initRecPlaybackControls() {
+      document.getElementById('btn-rec-play').addEventListener('click', toggleRecPlay);
+      document.getElementById('btn-rec-prev').addEventListener('click', () => stepRec(-1));
+      document.getElementById('btn-rec-next').addEventListener('click', () => stepRec(1));
+      document.getElementById('btn-rec-reset').addEventListener('click', () => stepRec(-999999));
+      document.getElementById('btn-rec-speed').addEventListener('click', cycleRecSpeed);
+      document.getElementById('btn-rec-loop').addEventListener('click', toggleRecLoop);
+
+      document.getElementById('rec-video-slider').addEventListener('input', (e) => {
+        pauseRec();
+        updateRecPlayback(parseInt(e.target.value, 10));
+      });
+
+      // Tab 5 controls
+      const btnTab5Play = document.getElementById('btn-play-pause');
+      if (btnTab5Play) btnTab5Play.addEventListener('click', toggleTab5Play);
+      const btnTab5Prev = document.getElementById('btn-tab5-prev');
+      if (btnTab5Prev) btnTab5Prev.addEventListener('click', () => stepTab5(-1));
+      const btnTab5Next = document.getElementById('btn-tab5-next');
+      if (btnTab5Next) btnTab5Next.addEventListener('click', () => stepTab5(1));
+      const btnTab5Speed = document.getElementById('btn-tab5-speed');
+      if (btnTab5Speed) btnTab5Speed.addEventListener('click', cycleTab5Speed);
+      const tab5Slider = document.getElementById('player-slider');
+      if (tab5Slider) {
+        tab5Slider.addEventListener('input', (e) => {
+          pauseTab5();
+          showTab5Frame(parseInt(e.target.value, 10));
+        });
+      }
+    }
+
+    function toggleRecPlay() {
+      if (recIsPlaying) pauseRec();
+      else playRec();
+    }
+
+    function playRec() {
+      const maxIdx = Math.max(recTrajectory.length, recFrames.length) - 1;
+      if (maxIdx <= 0) return;
+      recIsPlaying = true;
+      const btn = document.getElementById('btn-rec-play');
+      btn.innerHTML = '⏸ Pause';
+      btn.classList.remove('btn-primary');
+      btn.classList.add('btn-warning');
+
+      const pill = document.getElementById('rec-play-pill');
+      pill.innerText = `PLAYING (${recPlaySpeed}x)`;
+      pill.style.color = '#34d399';
+      pill.style.borderColor = 'rgba(52,211,153,0.4)';
+
+      if (recCurrentIndex >= maxIdx) {
+        recCurrentIndex = 0;
+      }
+
+      const frameInterval = Math.max(20, Math.round(66 / recPlaySpeed));
+      if (recPlayTimer) clearInterval(recPlayTimer);
+      recPlayTimer = setInterval(() => {
+        if (recCurrentIndex < maxIdx) {
+          recCurrentIndex++;
+          updateRecPlayback(recCurrentIndex);
+        } else {
+          if (recLoop) {
+            recCurrentIndex = 0;
+            updateRecPlayback(0);
+          } else {
+            pauseRec();
+          }
+        }
+      }, frameInterval);
+    }
+
+    function pauseRec() {
+      recIsPlaying = false;
+      if (recPlayTimer) {
+        clearInterval(recPlayTimer);
+        recPlayTimer = null;
+      }
+      const btn = document.getElementById('btn-rec-play');
+      btn.innerHTML = '▶ Play';
+      btn.classList.remove('btn-warning');
+      btn.classList.add('btn-primary');
+
+      const pill = document.getElementById('rec-play-pill');
+      pill.innerText = 'PAUSED';
+      pill.style.color = '#fbbf24';
+      pill.style.borderColor = 'rgba(251,191,36,0.4)';
+    }
+
+    function cycleRecSpeed() {
+      const speeds = [0.5, 1.0, 2.0, 4.0];
+      const curIdx = speeds.indexOf(recPlaySpeed);
+      recPlaySpeed = speeds[(curIdx + 1) % speeds.length];
+      document.getElementById('btn-rec-speed').innerText = `${recPlaySpeed.toFixed(1)}x`;
+      if (recIsPlaying) playRec();
+    }
+
+    function toggleRecLoop() {
+      recLoop = !recLoop;
+      const btn = document.getElementById('btn-rec-loop');
+      btn.innerText = recLoop ? '🔁 Loop' : '➡ Once';
+      btn.style.color = recLoop ? '#38bdf8' : '#94a3b8';
+    }
+
+    function stepRec(delta) {
+      pauseRec();
+      const maxIdx = Math.max(recTrajectory.length, recFrames.length) - 1;
+      const target = Math.max(0, Math.min(recCurrentIndex + delta, maxIdx));
+      updateRecPlayback(target);
+    }
+
+    async function fetchSessions() {
+      try {
+        const res = await fetch('/api/sessions');
+        const data = await res.json();
+        sessionsList = data.sessions || [];
+        const dropdown = document.getElementById('session-dropdown');
+        dropdown.innerHTML = '';
+
+        sessionsList.forEach(s => {
+          const opt = document.createElement('option');
+          opt.value = s.id;
+          opt.text = (s.is_demo ? '🧪 ' : '📱 ') + s.device + ' [' + s.id + ']';
+          dropdown.appendChild(opt);
+        });
+
+        if (sessionsList.length > 0) {
+          if (!currentSession || !sessionsList.some(s => s.id === currentSession)) {
+            currentSession = sessionsList[0].id;
+          }
+          dropdown.value = currentSession;
+          loadSessionData(currentSession);
+        }
+      } catch (e) { }
+    }
+
+    document.getElementById('session-dropdown').addEventListener('change', (e) => {
+      currentSession = e.target.value;
+      loadSessionData(currentSession);
+    });
+    document.getElementById('btn-reload-sessions').addEventListener('click', fetchSessions);
+    document.getElementById('btn-open-explorer').addEventListener('click', async () => {
+      if (!currentSession) return;
+      await fetch(`/api/sessions/${currentSession}/reveal`, { method: 'POST' });
+    });
+
+    document.getElementById('btn-process-slam').addEventListener('click', async () => {
+      if (!currentSession) return;
+      await fetch(`/api/sessions/${currentSession}/process`, { method: 'POST' });
+      alert('Started MSCKF SLAM for ' + currentSession);
+    });
+    document.getElementById('btn-process-baseline').addEventListener('click', async () => {
+      if (!currentSession) return;
+      await fetch(`/api/sessions/${currentSession}/process_baseline`, { method: 'POST' });
+      alert('Started Pure VIO Baseline for ' + currentSession);
+    });
+
+    async function loadSessionData(sessionId) {
+      if (!sessionId) return;
+      pauseRec();
+      try {
+        const [trajRes, framesRes] = await Promise.all([
+          fetch(`/api/sessions/${sessionId}/trajectory_3d`),
+          fetch(`/api/sessions/${sessionId}/frames`)
+        ]);
+        const trajData = await trajRes.json();
+        const framesData = await framesRes.json();
+
+        recTrajectory = trajData.trajectory || [];
+        recFrames = framesData.frames || [];
+
+        renderRecorded3D(trajData);
+        populateScorecard(trajData);
+      } catch (e) {
+        console.error('Error loading session data:', e);
+      }
+
+      // Also fetch sensor inventory & sync Tab 5
+      try {
+        const res = await fetch(`/api/sessions/${sessionId}`);
+        const data = await res.json();
+        populateSensors(data);
+      } catch (e) { }
+
+      updateTab5Player(sessionId);
+    }
+
+    function renderRecorded3D(data) {
+      if (!recScene) return;
+      if (recSlamLine) recScene.remove(recSlamLine);
+      if (recFloorShadowLine) recScene.remove(recFloorShadowLine);
+      if (recBaseLine) recScene.remove(recBaseLine);
+      if (recGtLine) recScene.remove(recGtLine);
+      recMarkerGroup.clear();
+
+      // 1. Catmull-Rom Spline Smooth 3D SLAM Trajectory
+      if (recTrajectory && recTrajectory.length >= 2) {
+        const pts = recTrajectory.map(p => new THREE.Vector3(p.x, p.y, p.z));
+        const curve = new THREE.CatmullRomCurve3(pts, false, 'centripetal', 0.5);
+        const numSplinePts = Math.min(600, Math.max(80, pts.length * 3));
+        const smoothPts = curve.getPoints(numSplinePts);
+
+        recSlamLine = new THREE.Line(
+          new THREE.BufferGeometry().setFromPoints(smoothPts),
+          new THREE.LineBasicMaterial({ color: 0x00f5ff, linewidth: 3 })
+        );
+        recScene.add(recSlamLine);
+
+        const shadowPts = smoothPts.map(p => new THREE.Vector3(p.x, -1.24, p.z));
+        recFloorShadowLine = new THREE.Line(
+          new THREE.BufferGeometry().setFromPoints(shadowPts),
+          new THREE.LineBasicMaterial({ color: 0x10b981, transparent: true, opacity: 0.7, linewidth: 2 })
+        );
+        recScene.add(recFloorShadowLine);
+      } else if (recTrajectory && recTrajectory.length === 1) {
+        const p = recTrajectory[0];
+        const geom = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(p.x, p.y, p.z), new THREE.Vector3(p.x, p.y + 0.01, p.z)]);
+        recSlamLine = new THREE.Line(geom, new THREE.LineBasicMaterial({ color: 0x00f5ff, linewidth: 3 }));
+        recScene.add(recSlamLine);
+      }
+
+      // 2. Baseline Trajectory (Pure VIO without ArUco)
+      if (data.baseline && data.baseline.length >= 2) {
+        const bpts = data.baseline.map(p => new THREE.Vector3(p.x, p.y, p.z));
+        const bcurve = new THREE.CatmullRomCurve3(bpts, false, 'centripetal');
+        const smoothBase = bcurve.getPoints(Math.min(300, bpts.length * 2));
+        recBaseLine = new THREE.Line(
+          new THREE.BufferGeometry().setFromPoints(smoothBase),
+          new THREE.LineDashedMaterial({ color: 0xfbbf24, dashSize: 0.06, gapSize: 0.03 })
+        );
+        recBaseLine.computeLineDistances();
+        recScene.add(recBaseLine);
+      }
+
+      // 3. Surveyed Wall Markers
+      const markers = data.markers || [];
+      const markerTbody = document.getElementById('marker-tbody');
+      markerTbody.innerHTML = '';
+      markers.forEach(m => {
+        const plane = new THREE.Mesh(
+          new THREE.PlaneGeometry(0.22, 0.22),
+          new THREE.MeshBasicMaterial({ color: 0xffffff, side: THREE.DoubleSide })
+        );
+        plane.position.set(m.pos[0], m.pos[1], m.pos[2]);
+        if (m.rot) {
+          const m4 = new THREE.Matrix4();
+          m4.set(
+            m.rot[0][0], m.rot[0][1], m.rot[0][2], 0,
+            m.rot[1][0], m.rot[1][1], m.rot[1][2], 0,
+            m.rot[2][0], m.rot[2][1], m.rot[2][2], 0,
+            0, 0, 0, 1
+          );
+          plane.quaternion.setFromRotationMatrix(m4);
+        }
+        const border = new THREE.LineSegments(
+          new THREE.EdgesGeometry(new THREE.PlaneGeometry(0.22, 0.22)),
+          new THREE.LineBasicMaterial({ color: 0x10b981, linewidth: 2 })
+        );
+        plane.add(border);
+        recMarkerGroup.add(plane);
+
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td><strong style="color:var(--primary);">#${m.id}</strong></td>
+          <td><span class="status-badge" style="padding:2px 8px; font-size:11px;">Fixed Surveyed</span></td>
+          <td>${m.pos[0].toFixed(3)}</td>
+          <td>${m.pos[1].toFixed(3)}</td>
+          <td>${m.pos[2].toFixed(3)}</td>
+          <td>(${m.rot?.[0]?.[2]?.toFixed(2) || '0'}, ${m.rot?.[1]?.[2]?.toFixed(2) || '0'}, ${m.rot?.[2]?.[2]?.toFixed(2) || '1'})</td>
+          <td>Fiducial Wall Anchor</td>
+        `;
+        markerTbody.appendChild(tr);
+      });
+
+      // 4. Update Metric Cards
+      const totalPts = recTrajectory.length;
+      const arucoCount = data.summary?.counts?.aruco_updates ?? markers.length;
+      const mappedCount = markers.length;
+      const stateStr = totalPts > 0 ? (recTrajectory[totalPts - 1].state || 'TRACKING (Visual-Inertial)') : '—';
+      const dur = data.summary?.duration_s !== undefined ? Math.abs(data.summary.duration_s).toFixed(1) : (totalPts > 0 ? Math.abs(recTrajectory[totalPts - 1].t - recTrajectory[0].t).toFixed(1) : '—');
+
+      document.getElementById('val-visual-updates').innerText = totalPts > 0 ? `${totalPts} waypoints` : '—';
+      document.getElementById('val-marker-updates').innerText = arucoCount > 0 ? `${arucoCount} updates` : '—';
+      document.getElementById('val-mapped-markers').innerText = mappedCount > 0 ? `${mappedCount} markers` : '—';
+      document.getElementById('val-tracking-state').innerText = stateStr;
+      document.getElementById('val-runtime').innerText = `Runtime: ${dur}s (${totalPts} frames)`;
+
+      // 5. Setup timeline slider & initial playback state
+      const slider = document.getElementById('rec-video-slider');
+      const maxIdx = Math.max(0, Math.max(recTrajectory.length, recFrames.length) - 1);
+      slider.min = "0";
+      slider.max = String(maxIdx);
+      slider.value = "0";
+      recCurrentIndex = 0;
+      updateRecPlayback(0);
+    }
+
+    function updateRecPlayback(index) {
+      const maxIdx = Math.max(recTrajectory.length, recFrames.length) - 1;
+      const noVideoOverlay = document.getElementById('rec-no-video-overlay');
+
+      if (maxIdx < 0) {
+        if (noVideoOverlay) noVideoOverlay.style.display = 'flex';
+        return;
+      }
+      if (noVideoOverlay) noVideoOverlay.style.display = 'none';
+
+      index = Math.max(0, Math.min(index, maxIdx));
+      recCurrentIndex = index;
+      document.getElementById('rec-video-slider').value = index;
+
+      // 1. Update Video Frame
+      const frameImg = document.getElementById('rec-video-frame');
+      if (recFrames.length > 0) {
+        const fIdx = Math.min(index, recFrames.length - 1);
+        frameImg.src = `/api/sessions/${currentSession}/frames/${recFrames[fIdx]}`;
+      } else {
+        frameImg.src = '';
+      }
+
+      // 2. Trajectory Waypoint at index
+      const tIdx = Math.min(index, Math.max(0, recTrajectory.length - 1));
+      const pt = (recTrajectory && recTrajectory.length > 0) ? recTrajectory[tIdx] : { x: 0, y: 0, z: 1.5, t: 0, state: 'IDLE', speed: 0, sigma: [0.04, 0.04, 0.04] };
+
+      // 3. Update HUD & Telemetry
+      const timeStr = (pt.t !== undefined && recTrajectory.length > 0) ? Math.abs(pt.t - recTrajectory[0].t).toFixed(2) + 's' : '0.00s';
+      document.getElementById('rec-hud-frame').innerText = `Frame: ${index + 1} / ${maxIdx + 1} (${timeStr})`;
+      document.getElementById('rec-hud-state').innerText = pt.state || 'EKF TRACKING';
+      document.getElementById('rec-frame-text').innerText = `Frame: ${index + 1} / ${maxIdx + 1} (${timeStr})`;
+
+      document.getElementById('rec-pos-val').innerText = `X: ${pt.x.toFixed(2)}, Y: ${pt.y.toFixed(2)}, Z: ${pt.z.toFixed(2)} m`;
+      const elev = (pt.y + 1.25).toFixed(2);
+      document.getElementById('rec-elev-val').innerText = `${elev} m`;
+      document.getElementById('rec-speed-val').innerText = `${(pt.speed || 0.0).toFixed(2)} m/s`;
+      document.getElementById('rec-state-val').innerText = pt.state || 'EKF TRACKING';
+      const sig = (pt.sigma && pt.sigma[0]) ? pt.sigma[0] : 0.03;
+      document.getElementById('rec-sigma-val').innerText = `±${sig.toFixed(2)} m`;
+
+      // Path distance traveled up to this point
+      let distSoFar = 0.0;
+      for (let i = 1; i <= tIdx && i < recTrajectory.length; i++) {
+        const dx = recTrajectory[i].x - recTrajectory[i - 1].x;
+        const dy = recTrajectory[i].y - recTrajectory[i - 1].y;
+        const dz = recTrajectory[i].z - recTrajectory[i - 1].z;
+        distSoFar += Math.sqrt(dx * dx + dy * dy + dz * dz);
+      }
+      document.getElementById('rec-dist-val').innerText = `${distSoFar.toFixed(2)} m`;
+      document.getElementById('rec-overlay-dist').innerText = `${distSoFar.toFixed(2)} m`;
+      document.getElementById('rec-overlay-count').innerText = `${tIdx + 1} / ${recTrajectory.length}`;
+
+      // 4. Update 3D Camera Frustum & Plumb Line
+      if (recFrustumMesh && recPlumbLine && recScene) {
+        recFrustumMesh.position.set(pt.x, pt.y, pt.z);
+        if (pt.qx !== undefined && pt.qw !== undefined) {
+          recFrustumMesh.quaternion.set(pt.qx, pt.qy, pt.qz, pt.qw);
+        }
+        const plumbPos = recPlumbLine.geometry.attributes.position.array;
+        plumbPos[0] = pt.x; plumbPos[1] = pt.y; plumbPos[2] = pt.z;
+        plumbPos[3] = pt.x; plumbPos[4] = -1.24; plumbPos[5] = pt.z;
+        recPlumbLine.geometry.attributes.position.needsUpdate = true;
+
+        if (recPlumbTarget) {
+          recPlumbTarget.position.set(pt.x, -1.24, pt.z);
+        }
+      }
+
+      // 5. Update 2D Minimap Radar
+      drawRecMinimap(tIdx, distSoFar);
+    }
+
+    function drawRecMinimap(currentIndex, distSoFar) {
+      const canvas = document.getElementById('rec-minimap-canvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      const w = canvas.width, h = canvas.height;
+      ctx.clearRect(0, 0, w, h);
+
+      // Boundaries: X: -2.0 to +2.0m (width 4m), Z: 0.0 to 5.0m (length 5m)
+      const margin = 14;
+      const mapW = w - 2 * margin;
+      const mapH = h - 2 * margin;
+
+      function toC(x, z) {
+        const cx = margin + ((x + 2.0) / 4.0) * mapW;
+        const cy = (h - margin) - (z / 5.0) * mapH;
+        return [cx, cy];
+      }
+
+      // Room Box
+      ctx.fillStyle = '#070b14';
+      ctx.fillRect(margin, margin, mapW, mapH);
+      ctx.strokeStyle = 'rgba(56, 189, 248, 0.4)';
+      ctx.lineWidth = 1.5;
+      ctx.strokeRect(margin, margin, mapW, mapH);
+
+      // Door & Front Wall Tags
+      ctx.fillStyle = '#64748b';
+      ctx.font = '8px monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText('DOOR (Z=0m)', w / 2, h - 3);
+      ctx.fillText('FRONT (Z=5m)', w / 2, 10);
+
+      // Grid
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
+      ctx.lineWidth = 1;
+      for (let z = 1; z < 5; z++) {
+        const [_, gy] = toC(0, z);
+        ctx.beginPath(); ctx.moveTo(margin, gy); ctx.lineTo(margin + mapW, gy); ctx.stroke();
+      }
+      for (let x = -1; x <= 1; x++) {
+        const [gx, _] = toC(x, 0);
+        ctx.beginPath(); ctx.moveTo(gx, margin); ctx.lineTo(gx, h - margin); ctx.stroke();
+      }
+
+      // Surveyed Wall Markers
+      const wallMarkers = [
+        { id: 0, x: 0.0, z: 4.5 },
+        { id: 1, x: 1.2, z: 4.5 },
+        { id: 2, x: 2.0, z: 2.5 },
+        { id: 3, x: 0.0, z: 0.5 },
+        { id: 4, x: -2.0, z: 1.5 },
+        { id: 5, x: -2.0, z: 3.5 }
+      ];
+      wallMarkers.forEach(m => {
+        const [mx, my] = toC(m.x, m.z);
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(mx - 3, my - 3, 6, 6);
+        ctx.strokeStyle = '#38bdf8';
+        ctx.strokeRect(mx - 3, my - 3, 6, 6);
+        ctx.fillStyle = '#94a3b8';
+        ctx.font = '7px monospace';
+        ctx.fillText(`M${m.id}`, mx + 8, my + 3);
+      });
+
+      // Complete Trajectory Path (Smooth Spline)
+      if (recTrajectory.length >= 2) {
+        ctx.beginPath();
+        ctx.strokeStyle = 'rgba(0, 245, 255, 0.35)';
+        ctx.lineWidth = 1.5;
+        const [x0, y0] = toC(recTrajectory[0].x, recTrajectory[0].z);
+        ctx.moveTo(x0, y0);
+        for (let i = 1; i < recTrajectory.length; i++) {
+          const [cx, cy] = toC(recTrajectory[i].x, recTrajectory[i].z);
+          ctx.lineTo(cx, cy);
+        }
+        ctx.stroke();
+
+        // Traveled segment
+        ctx.beginPath();
+        ctx.strokeStyle = '#00f5ff';
+        ctx.lineWidth = 2.5;
+        ctx.shadowColor = '#00f5ff';
+        ctx.shadowBlur = 4;
+        ctx.moveTo(x0, y0);
+        for (let i = 1; i <= currentIndex && i < recTrajectory.length; i++) {
+          const [cx, cy] = toC(recTrajectory[i].x, recTrajectory[i].z);
+          ctx.lineTo(cx, cy);
+        }
+        ctx.stroke();
+        ctx.shadowBlur = 0;
+      }
+
+      // Phone Position Pin
+      if (recTrajectory.length > 0) {
+        const curPt = recTrajectory[Math.min(currentIndex, recTrajectory.length - 1)];
+        const [px, py] = toC(curPt.x, curPt.z);
+
+        ctx.beginPath();
+        ctx.arc(px, py, 6, 0, 2 * Math.PI);
+        ctx.fillStyle = 'rgba(239, 68, 68, 0.35)';
+        ctx.fill();
+
+        ctx.beginPath();
+        ctx.arc(px, py, 3.5, 0, 2 * Math.PI);
+        ctx.fillStyle = '#ef4444';
+        ctx.fill();
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+      }
+
+      document.getElementById('rec-radar-dist-tag').innerText = `${distSoFar.toFixed(2)} m`;
+      document.getElementById('rec-radar-idx-tag').innerText = `Pt: ${currentIndex + 1} / ${recTrajectory.length}`;
+    }
+
+    // ==========================================
+    // TAB 5: VIDEO PLAYER LOGIC
+    // ==========================================
+    async function updateTab5Player(sessionId) {
+      if (!sessionId) return;
+      try {
+        const res = await fetch(`/api/sessions/${sessionId}/frames`);
+        const data = await res.json();
+        tab5Frames = data.frames || [];
+        const slider = document.getElementById('player-slider');
+        slider.min = "0";
+        slider.max = String(Math.max(0, tab5Frames.length - 1));
+        slider.value = "0";
+        tab5Index = 0;
+        showTab5Frame(0);
+      } catch (e) { }
+    }
+
+    function showTab5Frame(idx) {
+      const emptyHint = document.getElementById('player-empty-hint');
+      const img = document.getElementById('player-img');
+      const info = document.getElementById('player-frame-info');
+
+      if (!tab5Frames.length) {
+        img.src = '';
+        if (emptyHint) emptyHint.style.display = 'block';
+        info.innerText = 'No frames available';
+        return;
+      }
+      if (emptyHint) emptyHint.style.display = 'none';
+
+      idx = Math.max(0, Math.min(idx, tab5Frames.length - 1));
+      tab5Index = idx;
+      document.getElementById('player-slider').value = idx;
+      img.src = `/api/sessions/${currentSession}/frames/${tab5Frames[idx]}`;
+      info.innerText = `Frame ${idx + 1} / ${tab5Frames.length}`;
+    }
+
+    function toggleTab5Play() {
+      if (tab5Playing) pauseTab5();
+      else playTab5();
+    }
+
+    function playTab5() {
+      if (!tab5Frames.length) return;
+      tab5Playing = true;
+      const btn = document.getElementById('btn-play-pause');
+      btn.innerText = '⏸ Pause';
+      btn.classList.remove('btn-primary');
+      btn.classList.add('btn-warning');
+      document.getElementById('tab5-pill').innerText = `PLAYING (${tab5Speed}x)`;
+      document.getElementById('tab5-pill').style.color = '#34d399';
+
+      const interval = Math.max(20, Math.round(66 / tab5Speed));
+      if (tab5Timer) clearInterval(tab5Timer);
+      tab5Timer = setInterval(() => {
+        if (tab5Index < tab5Frames.length - 1) {
+          tab5Index++;
+          showTab5Frame(tab5Index);
+        } else {
+          tab5Index = 0;
+          showTab5Frame(0);
+        }
+      }, interval);
+    }
+
+    function pauseTab5() {
+      tab5Playing = false;
+      if (tab5Timer) {
+        clearInterval(tab5Timer);
+        tab5Timer = null;
+      }
+      const btn = document.getElementById('btn-play-pause');
+      btn.innerText = '▶ Play';
+      btn.classList.remove('btn-warning');
+      btn.classList.add('btn-primary');
+      document.getElementById('tab5-pill').innerText = 'PAUSED';
+      document.getElementById('tab5-pill').style.color = '#fbbf24';
+    }
+
+    function stepTab5(delta) {
+      pauseTab5();
+      showTab5Frame(tab5Index + delta);
+    }
+
+    function cycleTab5Speed() {
+      const speeds = [0.5, 1.0, 2.0];
+      const curIdx = speeds.indexOf(tab5Speed);
+      tab5Speed = speeds[(curIdx + 1) % speeds.length];
+      document.getElementById('btn-tab5-speed').innerText = `${tab5Speed.toFixed(1)}x`;
+      if (tab5Playing) playTab5();
+    }
+
+    function populateScorecard(data) {
+      const comp = data.comparison || {};
+      const slam = comp.processed || {};
+      const base = comp.baseline || {};
+      const tbody = document.getElementById('scorecard-tbody');
+      tbody.innerHTML = '';
+
+      const metrics = [
+        { name: 'Position RMSE (ATE)', slam: slam.position_rmse_m, base: base.position_rmse_m, factor: 100, label: 'cm', theory: 'Absolute metric trajectory error vs ground truth.' },
+        { name: 'Median Position Error', slam: slam.position_median_m, base: base.position_median_m, factor: 100, label: 'cm', theory: 'Robust 50% quantile error.' },
+        { name: 'Endpoint Drift Error', slam: slam.endpoint_error_m, base: base.endpoint_error_m, factor: 100, label: 'cm', theory: 'Final accumulated drift at end of path.' },
+        { name: 'Drift per Metre Travelled', slam: slam.endpoint_error_per_m, base: base.endpoint_error_per_m, factor: 100, label: '%', theory: 'Normalized drift rate per metre walked.' },
+        { name: 'Relative Pose Error (1s RPE)', slam: slam.relative_displacement_1s_rmse_m, base: base.relative_displacement_1s_rmse_m, factor: 100, label: 'cm/s', theory: 'Local consistency and velocity drift.' },
+        { name: 'Orientation RMSE', slam: slam.orientation_rmse_deg, base: base.orientation_rmse_deg, factor: 1, label: 'deg', theory: 'Heading (Yaw) & tilt error.' }
+      ];
+
+      metrics.forEach(m => {
+        const hasS = typeof m.slam === 'number';
+        const hasB = typeof m.base === 'number';
+        const slamStr = hasS ? (m.slam * m.factor).toFixed(2) + ' ' + m.label : '—';
+        const baseStr = hasB ? (m.base * m.factor).toFixed(2) + ' ' + m.label : 'Not processed';
+        let diff = '—';
+        if (hasS && hasB && m.base > 0) {
+          const ratio = ((m.base - m.slam) / m.base) * 100;
+          diff = `<span class="diff-badge diff-better">▲ ${ratio.toFixed(1)}% Better</span>`;
+        }
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td><strong>${m.name}</strong></td>
+          <td><strong style="color:var(--primary); font-family:var(--mono);">${slamStr}</strong></td>
+          <td><span style="color:var(--warning); font-family:var(--mono);">${baseStr}</span></td>
+          <td>${diff}</td>
+          <td style="color:var(--text-muted); font-size:12px;">${m.theory}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function populateSensors(data) {
+      const tbody = document.getElementById('inventory-tbody');
+      tbody.innerHTML = '';
+      const sDropdown = document.getElementById('sensor-dropdown');
+      sDropdown.innerHTML = '';
+
+      (data.sensors || []).forEach(s => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td><span style="font-family:var(--mono); color:var(--primary);">${s.key}</span></td>
+          <td><strong>${s.name}</strong></td>
+          <td>${s.vendor}</td>
+          <td>${s.samples}</td>
+          <td>${s.duration_s?.toFixed(2) || '0.00'}</td>
+          <td><strong style="color:var(--primary);">${s.effective_rate_hz?.toFixed(1) || '0.0'} Hz</strong></td>
+        `;
+        tbody.appendChild(tr);
+
+        const opt = document.createElement('option');
+        opt.value = s.key;
+        opt.text = `${s.name} (${s.samples} samples, ${s.effective_rate_hz?.toFixed(1)} Hz)`;
+        sDropdown.appendChild(opt);
+      });
+    }
+
+    async function fetchExperiments() {
+      try {
+        const res = await fetch('/api/experiments');
+        const data = await res.json();
+        const grid = document.getElementById('experiments-grid');
+        grid.innerHTML = '';
+        (data.experiments || []).forEach(exp => {
+          const comp = exp.comparison || {};
+          const p = comp.processed || {};
+          const b = comp.baseline || {};
+          const card = document.createElement('div');
+          card.className = 'exp-card';
+          card.innerHTML = `
+            <div>
+              <div style="display:flex; justify-content:space-between; align-items:center;">
+                <strong style="font-size:15px;">${exp.name}</strong>
+                <span class="status-badge" style="font-size:10px; padding:2px 8px;">${exp.has_processed ? '✅ Complete' : '⏳ Pending'}</span>
+              </div>
+              <p style="font-size:12px; color:var(--text-muted); margin-top:6px;">${exp.description}</p>
+            </div>
+            <div style="background:rgba(15, 23, 42, 0.6); padding:8px 12px; border-radius:6px; font-size:12px; font-family:var(--mono); display:flex; justify-content:space-between;">
+              <div>SLAM: <strong style="color:var(--primary);">${p.position_rmse_m ? (p.position_rmse_m * 100).toFixed(1) + 'cm' : '—'}</strong></div>
+              <div>Base: <strong style="color:var(--warning);">${b.position_rmse_m ? (b.position_rmse_m * 100).toFixed(1) + 'cm' : '—'}</strong></div>
+            </div>
+            <button class="btn btn-primary" style="padding:6px 12px; font-size:12px;" onclick="runBenchmarkScenario('${exp.id}')">▶ Run Benchmark</button>
+          `;
+          grid.appendChild(card);
+        });
+      } catch (e) { }
+    }
+
+    async function runBenchmarkScenario(scenario) {
+      if (!confirm(`Execute benchmark scenario '${scenario}'?`)) return;
+      await fetch('/api/experiments/run', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ scenario: scenario })
+      });
+      alert('Started benchmark ' + scenario);
+    }
+
+    async function fetchMarkersList() {
+      const grid = document.getElementById('marker-print-grid');
+      grid.innerHTML = '';
+      const wallNames = [
+        'Front Wall Center [0.0, 0.0, 4.5]m',
+        'Front Wall Right [1.2, 0.25, 4.5]m',
+        'Right Wall Center [2.0, 0.0, 2.5]m',
+        'Back Wall Center [0.0, 0.0, 0.5]m',
+        'Left Wall Near [-2.0, -0.25, 1.5]m',
+        'Left Wall Far [-2.0, 0.25, 3.5]m'
+      ];
+      for (let id = 0; id < 6; id++) {
+        try {
+          const res = await fetch(`/api/markers/svg/${id}`);
+          const svg = await res.text();
+          const box = document.createElement('div');
+          box.className = 'marker-box';
+          box.innerHTML = `
+            ${svg}
+            <div style="font-size:12px; font-weight:700; color:#0f172a; margin-top:4px;">Marker #${id}</div>
+            <div style="font-size:10px; color:#64748b; font-family:monospace; text-align:center;">${wallNames[id] || ''}</div>
+            <div style="display:flex; gap:6px; margin-top:6px;">
+              <a href="/api/markers/png/${id}" download="aruco_marker_${id}.png" class="btn btn-sm" style="padding:2px 8px; font-size:11px; background:#0284c7; color:#fff; text-decoration:none; border-radius:4px;">📥 PNG</a>
+              <a href="/api/markers/svg/${id}" download="aruco_marker_${id}.svg" class="btn btn-sm" style="padding:2px 8px; font-size:11px; background:#475569; color:#fff; text-decoration:none; border-radius:4px;">📥 SVG</a>
+            </div>
+          `;
+          grid.appendChild(box);
+        } catch (e) { }
+      }
+    }
+  </script>
+</body>
+
+</html>

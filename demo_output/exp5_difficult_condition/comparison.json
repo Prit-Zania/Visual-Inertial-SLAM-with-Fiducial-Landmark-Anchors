@@ -1,0 +1,37 @@
+{
+  "processed": {
+    "samples": 68,
+    "alignment": "none",
+    "position_rmse_m": 0.1883070599788795,
+    "position_median_m": 0.09623784225363094,
+    "position_p95_m": 0.4202261987282604,
+    "endpoint_error_m": 0.5016421976747166,
+    "relative_displacement_1s_rmse_m": 0.1541987736618074,
+    "reference_distance_m": 2.3343736836939577,
+    "endpoint_error_per_m": 0.21489369982997256,
+    "orientation_rmse_deg": 46.30337614413782,
+    "uncertainty": {
+      "position_nees_mean": 2.928987490524395,
+      "position_95pct_ellipsoid_coverage": 0.9852941176470589,
+      "expected_position_nees_if_model_consistent": 3,
+      "samples": 68,
+      "note": "Same coordinate frame required. Synthetic coverage does not validate phone noise calibration."
+    }
+  },
+  "baseline": {
+    "samples": 68,
+    "alignment": "none",
+    "position_rmse_m": 0.59713309119659,
+    "position_median_m": 0.5912635715773384,
+    "position_p95_m": 0.881501700402929,
+    "endpoint_error_m": 0.9564916825202096,
+    "relative_displacement_1s_rmse_m": 0.5057334256611232,
+    "reference_distance_m": 2.3343736836939577,
+    "endpoint_error_per_m": 0.40974231726543403,
+    "orientation_rmse_deg": 47.16535347251157
+  },
+  "scenario": "exp5_difficult_condition",
+  "description": "Scenario 5: Difficult condition with rapid angular velocity, high noise, and sparse markers.",
+  "slam_runtime_s": 38.79663230001461,
+  "baseline_runtime_s": 1.0521322999848053
+}

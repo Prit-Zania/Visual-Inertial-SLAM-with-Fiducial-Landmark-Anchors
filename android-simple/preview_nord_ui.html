@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OnePlus Nord CE • Sensor Studio UI Preview</title>
+  <style>
+    :root {
+      --bg-dark: #070b14;
+      --card-bg: #111827;
+      --card-border: #1f2937;
+      --telemetry-bg: #0f172a;
+      --telemetry-border: #1e293b;
+      --oneplus-red: #eb0029;
+      --oneplus-red-hover: #b91c1c;
+      --nord-cyan: #00f2fe;
+      --accent-sky: #38bdf8;
+      --emerald-ready: #10b981;
+      --crimson-rec: #ef4444;
+      --text-white: #f8fafc;
+      --text-slate-300: #cbd5e1;
+      --text-slate-400: #94a3b8;
+      --text-slate-500: #64748b;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    body {
+      background-color: #030712;
+      color: var(--text-white);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+    }
+
+    /* Top Control Bar */
+    .preview-bar {
+      width: 100%;
+      max-width: 1060px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #0f172a;
+      border: 1px solid #1e293b;
+      border-radius: 12px;
+      padding: 12px 20px;
+      margin-bottom: 20px;
+    }
+
+    .preview-bar h1 {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text-slate-300);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .preview-bar .badge-nord {
+      background: rgba(235, 0, 41, 0.15);
+      border: 1px solid var(--oneplus-red);
+      color: #ff4d6d;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 4px;
+      letter-spacing: 0.5px;
+    }
+
+    .toolbar-actions {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .btn-toggle {
+      background: #1e293b;
+      border: 1px solid #334155;
+      color: var(--text-slate-300);
+      padding: 7px 14px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-toggle:hover {
+      background: #334155;
+      color: #fff;
+    }
+
+    /* Phone Frame */
+    .device-container {
+      width: 100%;
+      max-width: 1040px;
+      background: #000;
+      border: 8px solid #1e293b;
+      border-radius: 36px;
+      box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.9), 0 0 0 1px rgba(255, 255, 255, 0.08);
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      aspect-ratio: 20 / 9;
+      transition: all 0.3s ease;
+    }
+
+    .device-container.portrait {
+      max-width: 440px;
+      aspect-ratio: 9 / 20;
+    }
+
+    /* Android Status Bar */
+    .android-status-bar {
+      height: 24px;
+      background: var(--bg-dark);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 16px;
+      font-size: 11px;
+      color: #94a3b8;
+      font-weight: 500;
+      user-select: none;
+    }
+
+    .status-icons {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    /* App Root Container */
+    .app-screen {
+      flex: 1;
+      background-color: var(--bg-dark);
+      padding: 10px 12px;
+      display: flex;
+      gap: 10px;
+      overflow: hidden;
+    }
+
+    .device-container.portrait .app-screen {
+      flex-direction: column;
+    }
+
+    /* Left Column: Controls */
+    .controls-panel {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+
+    .controls-panel::-webkit-scrollbar {
+      width: 4px;
+    }
+    .controls-panel::-webkit-scrollbar-thumb {
+      background: #334155;
+      border-radius: 4px;
+    }
+
+    /* Header Bar */
+    .brand-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2px;
+    }
+
+    .device-badge {
+      background: rgba(235, 0, 41, 0.16);
+      border: 1px solid var(--oneplus-red);
+      color: #ff4d6d;
+      font-size: 10px;
+      font-weight: 800;
+      padding: 2px 7px;
+      border-radius: 4px;
+      letter-spacing: 0.5px;
+    }
+
+    .status-badge {
+      font-size: 10px;
+      font-weight: 800;
+      padding: 2px 7px;
+      border-radius: 4px;
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid var(--emerald-ready);
+      color: var(--emerald-ready);
+      transition: all 0.3s;
+    }
+
+    .status-badge.recording {
+      background: rgba(239, 68, 68, 0.2);
+      border-color: var(--crimson-rec);
+      color: var(--crimson-rec);
+      animation: pulse-red 1.5s infinite;
+    }
+
+    @keyframes pulse-red {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.8; transform: scale(0.97); }
+    }
+
+    .app-title {
+      font-size: 17px;
+      font-weight: 700;
+      color: #fff;
+      margin-top: 3px;
+    }
+
+    .app-subtitle {
+      font-size: 11px;
+      color: var(--text-slate-400);
+      margin-bottom: 8px;
+    }
+
+    /* Connection Card */
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 10px;
+      padding: 10px 12px;
+      margin-bottom: 8px;
+    }
+
+    .card-label {
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--accent-sky);
+      letter-spacing: 0.5px;
+      margin-bottom: 6px;
+    }
+
+    .input-group {
+      margin-bottom: 6px;
+    }
+
+    .input-label {
+      font-size: 10.5px;
+      color: var(--text-slate-400);
+      margin-bottom: 3px;
+    }
+
+    .styled-input {
+      width: 100%;
+      background: #0f172a;
+      border: 1px solid #334155;
+      border-radius: 7px;
+      color: var(--text-white);
+      padding: 7px 10px;
+      font-size: 12.5px;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .styled-input:focus {
+      border-color: var(--nord-cyan);
+      box-shadow: 0 0 0 2px rgba(0, 242, 254, 0.15);
+    }
+
+    .row-inputs {
+      display: flex;
+      gap: 8px;
+    }
+
+    .row-inputs > div {
+      flex: 1;
+    }
+
+    /* Buttons Row */
+    .button-row {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    .btn-action {
+      flex: 1;
+      height: 40px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 700;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+
+    .btn-start {
+      background: var(--oneplus-red);
+      color: #fff;
+    }
+
+    .btn-start:hover:not(:disabled) {
+      background: var(--oneplus-red-hover);
+    }
+
+    .btn-stop {
+      background: #334155;
+      color: var(--text-slate-300);
+    }
+
+    .btn-stop.active {
+      background: #dc2626;
+      color: #fff;
+    }
+
+    .btn-stop.active:hover {
+      background: #b91c1c;
+    }
+
+    .btn-action:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+    }
+
+    /* Telemetry Card */
+    .telemetry-card {
+      background: var(--telemetry-bg);
+      border: 1px solid var(--telemetry-border);
+      border-radius: 10px;
+      padding: 10px 12px;
+    }
+
+    .telemetry-label {
+      font-size: 9.5px;
+      font-weight: 700;
+      color: var(--text-slate-500);
+      letter-spacing: 0.5px;
+      margin-bottom: 4px;
+    }
+
+    .telemetry-text {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 11px;
+      color: var(--text-slate-300);
+      line-height: 1.4;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+
+    /* Right Column: Camera Viewport */
+    .camera-card {
+      flex: 1.15;
+      background: #050811;
+      border: 1px solid var(--telemetry-border);
+      border-radius: 10px;
+      padding: 8px;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    .camera-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 4px 6px 4px;
+    }
+
+    .cam-title {
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--text-slate-400);
+      letter-spacing: 0.5px;
+    }
+
+    .cam-badges {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+    }
+
+    .badge-rec {
+      display: none;
+      background: rgba(239, 68, 68, 0.2);
+      border: 1px solid var(--crimson-rec);
+      color: #ff4d4d;
+      font-size: 9px;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 4px;
+      animation: pulse-red 1s infinite;
+    }
+
+    .badge-rec.active {
+      display: inline-block;
+    }
+
+    .badge-res {
+      background: rgba(0, 242, 254, 0.12);
+      border: 1px solid var(--nord-cyan);
+      color: var(--nord-cyan);
+      font-size: 9px;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+
+    /* Simulated Camera Viewfinder */
+    .viewfinder {
+      flex: 1;
+      background: #000;
+      border-radius: 6px;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .viewfinder-grid {
+      position: absolute;
+      inset: 0;
+      background-image: linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+                        linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+      background-size: 40px 40px;
+    }
+
+    .crosshair {
+      position: absolute;
+      width: 32px;
+      height: 32px;
+      border: 1px solid rgba(0, 242, 254, 0.4);
+      border-radius: 50%;
+    }
+
+    .crosshair::before, .crosshair::after {
+      content: "";
+      position: absolute;
+      background: rgba(0, 242, 254, 0.5);
+    }
+
+    .crosshair::before {
+      top: 50%;
+      left: -6px;
+      right: -6px;
+      height: 1px;
+    }
+
+    .crosshair::after {
+      left: 50%;
+      top: -6px;
+      bottom: -6px;
+      width: 1px;
+    }
+
+    /* Simulated ArUco Target */
+    .aruco-target {
+      position: absolute;
+      width: 70px;
+      height: 70px;
+      border: 2px dashed #00f2fe;
+      background: rgba(0, 242, 254, 0.08);
+      border-radius: 4px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      top: 25%;
+      right: 25%;
+      transition: all 0.5s ease;
+    }
+
+    .aruco-tag {
+      font-size: 9px;
+      color: #00f2fe;
+      font-weight: 700;
+      background: #070b14;
+      padding: 1px 4px;
+      border-radius: 2px;
+      margin-top: 2px;
+    }
+
+    /* Comparison Box */
+    .comparison-container {
+      width: 100%;
+      max-width: 1040px;
+      margin-top: 24px;
+      background: #0b0f19;
+      border: 1px solid #1e293b;
+      border-radius: 12px;
+      padding: 16px 20px;
+    }
+
+    .comparison-container h3 {
+      font-size: 14px;
+      color: var(--nord-cyan);
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .comparison-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .comp-col {
+      background: #070b14;
+      border: 1px solid #1f2937;
+      border-radius: 8px;
+      padding: 12px;
+    }
+
+    .comp-title {
+      font-size: 12px;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    .comp-title.old { color: #f87171; }
+    .comp-title.new { color: #4ade80; }
+
+    .comp-list {
+      list-style: none;
+      font-size: 11.5px;
+      color: var(--text-slate-400);
+      line-height: 1.6;
+    }
+
+    .comp-list li::before {
+      content: "• ";
+      color: var(--text-slate-500);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Action & View Switcher -->
+  <div class="preview-bar">
+    <h1>
+      <span>OnePlus Nord CE • APK UI Simulator</span>
+      <span class="badge-nord">NEW REDESIGN</span>
+    </h1>
+    <div class="toolbar-actions">
+      <button class="btn-toggle" onclick="toggleOrientation()">Switch to Portrait / Landscape</button>
+      <button class="btn-toggle" onclick="simulateStartStop()">Simulate App Recording</button>
+    </div>
+  </div>
+
+  <!-- Simulated Phone Device -->
+  <div class="device-container" id="device">
+    <!-- Android Top Bar -->
+    <div class="android-status-bar">
+      <span>8:20</span>
+      <div class="status-icons">
+        <span>5G</span>
+        <span>VoLTE</span>
+        <span>Wi-Fi</span>
+        <span>92% 🔋</span>
+      </div>
+    </div>
+
+    <!-- Redesigned Android App View -->
+    <div class="app-screen">
+
+      <!-- LEFT COLUMN: Controls & Setup -->
+      <div class="controls-panel">
+        <div class="brand-header">
+          <span class="device-badge">ONEPLUS NORD CE</span>
+          <span class="status-badge" id="statusBadge">● READY</span>
+        </div>
+
+        <div class="app-title">Sensor &amp; SLAM Studio</div>
+        <div class="app-subtitle">Visual-Inertial Odometry • IMU • High-Rate Stream</div>
+
+        <!-- Connection Card -->
+        <div class="card">
+          <div class="card-label">STREAM DESTINATION (TCP)</div>
+          <div class="input-group">
+            <div class="input-label">Laptop Wi-Fi IPv4</div>
+            <input type="text" class="styled-input" id="hostInput" placeholder="192.168.x.x (Leave blank for local storage)" value="192.168.1.42">
+          </div>
+          <div class="row-inputs">
+            <div>
+              <div class="input-label">Port</div>
+              <input type="text" class="styled-input" id="portInput" value="8765">
+            </div>
+            <div>
+              <div class="input-label">Pairing Token</div>
+              <input type="text" class="styled-input" id="tokenInput" placeholder="Receiver Token" value="7941">
+            </div>
+          </div>
+        </div>
+
+        <!-- Button Actions -->
+        <div class="button-row">
+          <button class="btn-action btn-start" id="startBtn" onclick="startCaptureSim()">
+            <span>▶</span> START
+          </button>
+          <button class="btn-action btn-stop" id="stopBtn" onclick="stopCaptureSim()" disabled>
+            <span>■</span> STOP &amp; SAVE
+          </button>
+        </div>
+
+        <!-- System Telemetry -->
+        <div class="telemetry-card">
+          <div class="telemetry-label">SYSTEM TELEMETRY</div>
+          <div class="telemetry-text" id="telemetryText">Ready. Enter laptop IP or record locally on OnePlus Nord. Exposed sensors: 38. Camera: Rear 640x480.</div>
+        </div>
+      </div>
+
+      <!-- RIGHT COLUMN: Camera Viewport -->
+      <div class="camera-card">
+        <div class="camera-header">
+          <span class="cam-title">OPTICAL SENSOR VIEWPORT</span>
+          <div class="cam-badges">
+            <span class="badge-rec" id="recBadge">● REC LIVE</span>
+            <span class="badge-res">640 × 480 NV21</span>
+          </div>
+        </div>
+
+        <div class="viewfinder">
+          <div class="viewfinder-grid"></div>
+          <div class="crosshair"></div>
+          <div class="aruco-target" id="arucoTarget">
+            <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
+              <rect x="2" y="2" width="32" height="32" fill="#000" stroke="#00f2fe" stroke-width="2"/>
+              <rect x="8" y="8" width="10" height="10" fill="#00f2fe"/>
+              <rect x="20" y="20" width="8" height="8" fill="#00f2fe"/>
+            </svg>
+            <span class="aruco-tag">ID: 04</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Comparison Summary -->
+  <div class="comparison-container">
+    <h3>Comparison: Before vs. After</h3>
+    <div class="comparison-grid">
+      <div class="comp-col">
+        <div class="comp-title old">❌ Old UI (Shown in your screenshot)</div>
+        <ul class="comp-list">
+          <li>Blinding white/grey background with plain light theme</li>
+          <li>Hardcoded "OnePlus 12R" title</li>
+          <li>Plain text input lines without borders or contrast</li>
+          <li>Generic grey system buttons ("START", "STOP AND SAVE")</li>
+          <li>Vertical stack crushes camera preview to a black rectangle in landscape</li>
+          <li>No status pills or visual recording indicators</li>
+        </ul>
+      </div>
+      <div class="comp-col">
+        <div class="comp-title new">✅ New UI (Implemented in MainActivity.java)</div>
+        <ul class="comp-list">
+          <li>Deep AMOLED dark theme (#070B14) tailored for OnePlus Fluid display</li>
+          <li>Custom "ONEPLUS NORD CE" brand pill and "Sensor & SLAM Studio" title</li>
+          <li>Elevated dark cards (#111827) with cyan glow on focused inputs</li>
+          <li>OnePlus Iconic Red (#EB0029) start button + Crimson stop button</li>
+          <li>Split 2-column landscape view giving 55% screen to camera preview</li>
+          <li>Dynamic status badge (● READY in emerald / ● RECORDING in pulsing red)</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let isRecording = false;
+    let timer = null;
+    let frameCount = 0;
+
+    function toggleOrientation() {
+      const dev = document.getElementById('device');
+      dev.classList.toggle('portrait');
+    }
+
+    function simulateStartStop() {
+      if (isRecording) stopCaptureSim();
+      else startCaptureSim();
+    }
+
+    function startCaptureSim() {
+      if (isRecording) return;
+      isRecording = true;
+      document.getElementById('startBtn').disabled = true;
+      document.getElementById('stopBtn').disabled = false;
+      document.getElementById('stopBtn').classList.add('active');
+
+      const badge = document.getElementById('statusBadge');
+      badge.textContent = '● RECORDING';
+      badge.classList.add('recording');
+
+      document.getElementById('recBadge').classList.add('active');
+
+      frameCount = 0;
+      updateTelemetry();
+      timer = setInterval(updateTelemetry, 500);
+
+      animateTarget();
+    }
+
+    function stopCaptureSim() {
+      if (!isRecording) return;
+      isRecording = false;
+      clearInterval(timer);
+      document.getElementById('startBtn').disabled = false;
+      document.getElementById('stopBtn').disabled = true;
+      document.getElementById('stopBtn').classList.remove('active');
+
+      const badge = document.getElementById('statusBadge');
+      badge.textContent = '● READY';
+      badge.classList.remove('recording');
+
+      document.getElementById('recBadge').classList.remove('active');
+
+      document.getElementById('telemetryText').textContent =
+        `Saved session capture.jsonl (${frameCount} frames, 38 sensors registered). Storage: /sdcard/Android/data/org.oneplus.sensorsimple/files/sessions/`;
+    }
+
+    function updateTelemetry() {
+      frameCount += 2;
+      const imuHz = 100;
+      document.getElementById('telemetryText').textContent =
+        `Recording live... \n• IMU rate: ${imuHz} Hz\n• Frames saved: ${frameCount}\n• Active TCP Stream: 192.168.1.42:8765\n• ArUco IDs detected: [4, 7]`;
+    }
+
+    function animateTarget() {
+      if (!isRecording) return;
+      const target = document.getElementById('arucoTarget');
+      const x = 20 + Math.random() * 50;
+      const y = 20 + Math.random() * 50;
+      target.style.top = y + '%';
+      target.style.left = x + '%';
+      if (isRecording) setTimeout(animateTarget, 1200);
+    }
+  </script>
+</body>
+</html>

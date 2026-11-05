@@ -1,0 +1,37 @@
+{
+  "processed": {
+    "samples": 88,
+    "alignment": "none",
+    "position_rmse_m": 0.6273560296475562,
+    "position_median_m": 0.6831955792436308,
+    "position_p95_m": 0.8069502546509046,
+    "endpoint_error_m": 0.7647275316817488,
+    "relative_displacement_1s_rmse_m": 0.29228453179863995,
+    "reference_distance_m": 3.1472034960996895,
+    "endpoint_error_per_m": 0.24298636317272493,
+    "orientation_rmse_deg": 1.1049702030372621,
+    "uncertainty": {
+      "position_nees_mean": 281.2106432481592,
+      "position_95pct_ellipsoid_coverage": 0.13636363636363635,
+      "expected_position_nees_if_model_consistent": 3,
+      "samples": 88,
+      "note": "Same coordinate frame required. Synthetic coverage does not validate phone noise calibration."
+    }
+  },
+  "baseline": {
+    "samples": 88,
+    "alignment": "none",
+    "position_rmse_m": 0.7306590358010792,
+    "position_median_m": 0.7997665836337182,
+    "position_p95_m": 0.9972420052003766,
+    "endpoint_error_m": 0.7804957629548354,
+    "relative_displacement_1s_rmse_m": 0.44008223256381757,
+    "reference_distance_m": 3.1472034960996895,
+    "endpoint_error_per_m": 0.24799659886057546,
+    "orientation_rmse_deg": 2.7428427556944444
+  },
+  "scenario": "exp3_closed_loop",
+  "description": "Scenario 3: Closed-loop trajectory returning to start with loop-closure re-observation.",
+  "slam_runtime_s": 189.646679700003,
+  "baseline_runtime_s": 1.7417850000201724
+}

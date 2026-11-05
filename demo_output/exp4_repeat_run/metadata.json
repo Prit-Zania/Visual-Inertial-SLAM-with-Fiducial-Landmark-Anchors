@@ -1,0 +1,1 @@
+{"kind": "hello", "protocol": "oneplus-msckf-v1", "session_id": "7c9e5bec-d1fe-4821-b438-cce2e75916f2", "synthetic": true, "scenario": "exp4_repeat_run", "description": "Scenario 4: Repeat run in the same room using the pre-constructed marker map from Scenario 3.", "selected_sensors": {"1": 1, "4": 4, "2": 2}}

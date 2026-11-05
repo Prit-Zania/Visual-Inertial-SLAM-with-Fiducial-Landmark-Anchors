@@ -1,0 +1,30 @@
+{
+  "frames": 49,
+  "state_samples": 79,
+  "calibration_verified": true,
+  "imu_initialized": true,
+  "filter": "15-error-state MSCKF + correlated camera clones + ArUco landmark states",
+  "counts": {
+    "visual_updates": 37,
+    "marker_updates": 58,
+    "rejected": 0
+  },
+  "marker_count": 6,
+  "visual_loops": 0,
+  "optimization_attempts": 14,
+  "optimization_accepted": 12,
+  "tracking_counts": {
+    "INITIALIZING": 0,
+    "TRACKING": 78,
+    "DEGRADED": 0,
+    "LOST": 1
+  },
+  "confidence": "MSCKF covariance is model-based; verify coverage against surveyed ground truth. Optimized poses do not inherit filter covariance.",
+  "limitations": [
+    "Camera/IMU calibration must be measured on the actual phone.",
+    "Fixed-window boundary is held constant; this is an educational smoother, not full marginalization.",
+    "No phone hardware validation or APK build has been performed.",
+    "Depth is recorded when exposed; range fusion requires explicit calibrated measurements."
+  ],
+  "runtime_s": 66.56086359999608
+}

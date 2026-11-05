@@ -1,0 +1,125 @@
+{
+  "camera_matrix": [
+    [
+      500.0,
+      0.0,
+      320.0
+    ],
+    [
+      0.0,
+      500.0,
+      240.0
+    ],
+    [
+      0.0,
+      0.0,
+      1.0
+    ]
+  ],
+  "distortion": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0
+  ],
+  "image_width": 640,
+  "image_height": 480,
+  "T_body_camera": [
+    [
+      1.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      1.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      1.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      1.0
+    ]
+  ],
+  "camera_imu_offset_s": 0.0,
+  "camera_clock_offset_verified": false,
+  "calibration_verified": true,
+  "marker_size_m": 0.12,
+  "dictionary": "DICT_6X6_250",
+  "gyro_noise": 0.008,
+  "accel_noise": 0.12,
+  "gyro_bias_walk": 0.0002,
+  "accel_bias_walk": 0.003,
+  "pixel_sigma": 1.5,
+  "max_clones": 8,
+  "max_features": 70,
+  "max_markers": 32,
+  "imu_max_gap_s": 0.05,
+  "camera_timeout_s": 1.0,
+  "dead_reckon_limit_s": 2.0,
+  "position_sigma_limit_m": 3.0,
+  "initialization_s": 1.0,
+  "mag_enabled": false,
+  "mag_bias": [
+    0.0,
+    0.0,
+    0.0
+  ],
+  "mag_matrix": [
+    [
+      1.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      1.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      1.0
+    ]
+  ],
+  "mag_reference_world": null,
+  "mag_sigma_rad": 0.15,
+  "graph_window": 6,
+  "graph_keyframe_s": 0.5,
+  "range_enabled": false,
+  "range_calibration_verified": false,
+  "depth_camera_matrix": null,
+  "T_camera_depth": null,
+  "accel_matrix": [
+    [
+      1.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      1.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      1.0
+    ]
+  ],
+  "accel_offset": [
+    0.0,
+    0.0,
+    0.0
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "camera_matrix": [[500.0, 0.0, 320.0], [0.0, 500.0, 240.0], [0.0, 0.0, 1.0]],
+  "distortion": [0.0, 0.0, 0.0, 0.0, 0.0],
+  "image_width": 640,
+  "image_height": 480,
+  "T_body_camera": [[1.0, 0.0, 0.0, 0.0], [0.0, -1.0, 0.0, 0.0], [0.0, 0.0, -1.0, 0.0], [0.0, 0.0, 0.0, 1.0]],
+  "camera_imu_offset_s": 0.0,
+  "camera_clock_offset_verified": false,
+  "calibration_verified": false,
+  "marker_size_m": 0.12,
+  "dictionary": "DICT_6X6_250",
+  "mag_enabled": false,
+  "mag_reference_world": null,
+  "range_enabled": false,
+  "range_calibration_verified": false,
+  "depth_camera_matrix": null,
+  "T_camera_depth": null
+}

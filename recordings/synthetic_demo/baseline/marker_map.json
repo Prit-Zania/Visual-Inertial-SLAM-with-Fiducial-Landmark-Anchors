@@ -1,0 +1,6 @@
+{
+  "marker_size_m": 0.12,
+  "dictionary": "DICT_6X6_250",
+  "frame": "initial gravity-aligned IMU",
+  "markers": {}
+}

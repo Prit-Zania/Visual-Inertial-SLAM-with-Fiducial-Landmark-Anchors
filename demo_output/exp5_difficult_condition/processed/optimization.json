@@ -1,0 +1,132 @@
+[
+  {
+    "kind": "window",
+    "end_frame": 3,
+    "cost": 0.0003916239265807683,
+    "optimality": 5.191582713726106e-08,
+    "converged": true,
+    "accepted": true,
+    "imu_factors": 2,
+    "feature_tracks": 0,
+    "marker_observations": 3
+  },
+  {
+    "kind": "window",
+    "end_frame": 7,
+    "cost": 16.618551804156287,
+    "optimality": 7.472406941947631,
+    "converged": false,
+    "accepted": false,
+    "imu_factors": 5,
+    "feature_tracks": 37,
+    "marker_observations": 6
+  },
+  {
+    "kind": "window",
+    "end_frame": 11,
+    "cost": 33.16261051318124,
+    "optimality": 5.361757981830674,
+    "converged": false,
+    "accepted": false,
+    "imu_factors": 5,
+    "feature_tracks": 1,
+    "marker_observations": 6
+  },
+  {
+    "kind": "window",
+    "end_frame": 15,
+    "cost": 3.062353177765572,
+    "optimality": 0.011888666498293787,
+    "converged": true,
+    "accepted": true,
+    "imu_factors": 5,
+    "feature_tracks": 4,
+    "marker_observations": 2
+  },
+  {
+    "kind": "window",
+    "end_frame": 19,
+    "cost": 48.283287441177535,
+    "optimality": 48.855851573879846,
+    "converged": false,
+    "accepted": false,
+    "imu_factors": 5,
+    "feature_tracks": 11,
+    "marker_observations": 1
+  },
+  {
+    "kind": "window",
+    "end_frame": 23,
+    "cost": 70.35392265132978,
+    "optimality": 1.0235693604733291,
+    "converged": false,
+    "accepted": false,
+    "imu_factors": 5,
+    "feature_tracks": 12,
+    "marker_observations": 0
+  },
+  {
+    "kind": "window",
+    "end_frame": 27,
+    "cost": 7.070161948161633e-17,
+    "optimality": 8.460650422049963e-07,
+    "converged": true,
+    "accepted": true,
+    "imu_factors": 5,
+    "feature_tracks": 0,
+    "marker_observations": 0
+  },
+  {
+    "kind": "window",
+    "end_frame": 31,
+    "cost": 3.2155520587723204e-23,
+    "optimality": 4.870048872623567e-09,
+    "converged": true,
+    "accepted": true,
+    "imu_factors": 5,
+    "feature_tracks": 0,
+    "marker_observations": 0
+  },
+  {
+    "kind": "window",
+    "end_frame": 35,
+    "cost": 1.1731522183222522e-25,
+    "optimality": 8.672525015258571e-10,
+    "converged": true,
+    "accepted": true,
+    "imu_factors": 5,
+    "feature_tracks": 0,
+    "marker_observations": 0
+  },
+  {
+    "kind": "window",
+    "end_frame": 39,
+    "cost": 6.166637008007277e-24,
+    "optimality": 2.6129375690009888e-09,
+    "converged": true,
+    "accepted": true,
+    "imu_factors": 5,
+    "feature_tracks": 0,
+    "marker_observations": 0
+  },
+  {
+    "kind": "window",
+    "end_frame": 41,
+    "cost": 7.669616091894331e-23,
+    "optimality": 6.116450499917036e-09,
+    "converged": true,
+    "accepted": true,
+    "imu_factors": 5,
+    "feature_tracks": 0,
+    "marker_observations": 0
+  },
+  {
+    "kind": "global_pose_graph",
+    "cost": 0.7713987795343784,
+    "converged": true,
+    "accepted": true,
+    "visual_loops": 0,
+    "marker_constraints": 12,
+    "note": "Correlated odometry/marker summaries; robust refinement, not an independent uncertainty estimate."
+  }
+]

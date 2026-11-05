@@ -1,0 +1,31 @@
+{
+  "processed": {
+    "samples": 61,
+    "alignment": "none",
+    "position_rmse_m": 0.035878854582886366,
+    "position_median_m": 0.0346758429653669,
+    "position_p95_m": 0.045544675199488474,
+    "endpoint_error_m": 0.031246770581379372,
+    "relative_displacement_1s_rmse_m": 0.015888661859883087,
+    "reference_distance_m": 0.88,
+    "endpoint_error_per_m": 0.03550769384247656,
+    "uncertainty": {
+      "position_nees_mean": 2.4533183970401424,
+      "position_95pct_ellipsoid_coverage": 1.0,
+      "expected_position_nees_if_model_consistent": 3,
+      "samples": 61,
+      "note": "Same coordinate frame required. Synthetic coverage does not validate phone noise calibration."
+    }
+  },
+  "baseline": {
+    "samples": 61,
+    "alignment": "none",
+    "position_rmse_m": 0.0030068323575430647,
+    "position_median_m": 0.001277264754375379,
+    "position_p95_m": 0.006671632776081553,
+    "endpoint_error_m": 0.003352495830957357,
+    "relative_displacement_1s_rmse_m": 0.004123369426322259,
+    "reference_distance_m": 0.88,
+    "endpoint_error_per_m": 0.003809654353360633
+  }
+}

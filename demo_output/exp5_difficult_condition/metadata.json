@@ -1,0 +1,1 @@
+{"kind": "hello", "protocol": "oneplus-msckf-v1", "session_id": "13610edb-f81b-4a6c-bfed-53f26d768e0c", "synthetic": true, "scenario": "exp5_difficult_condition", "description": "Scenario 5: Difficult condition with rapid angular velocity, high noise, and sparse markers.", "selected_sensors": {"1": 1, "4": 4, "2": 2}}

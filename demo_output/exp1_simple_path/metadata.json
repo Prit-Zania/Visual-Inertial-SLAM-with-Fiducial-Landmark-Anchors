@@ -1,0 +1,1 @@
+{"kind": "hello", "protocol": "oneplus-msckf-v1", "session_id": "2db2fa2a-a3ad-43e2-92a6-3118ba8ab775", "synthetic": true, "scenario": "exp1_simple_path", "description": "Scenario 1: Simple L-shaped trajectory past 4 fixed ArUco markers.", "selected_sensors": {"1": 1, "4": 4, "2": 2}}
